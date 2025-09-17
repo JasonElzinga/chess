@@ -57,17 +57,30 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
-    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        ChessPiece piece = board.getPiece(myPosition);
-        if (piece.getPieceType() == PieceType.BISHOP) {
-            return bishop_movement(board, myPosition);
-        }
-        if (piece.getPieceType() == PieceType.KING) {
-            return king_movement(board, myPosition);
-        }
-        return List.of();
+    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition pos) {
+
+        Rule rule = switch (getPieceType()) {
+            case BISHOP -> new Rule(true, new int[][]{{1,-1}, {-1,1},{-1,-1},{1,1}});
+            case ROOK -> new Rule(true, new int[][]{{1,0}, {-1,0},{0,1},{0,-1}});
+            case KNIGHT -> new Rule(false, new int[][]{{2,1},{-2,1},{2,-1},{-2,-1},{1,2}, {-1,2},{1,-2},{-1,-2}});
+            case QUEEN -> new Rule(true, new int[][]{{1,0}, {-1,0},{0,1},{0,-1},{1,-1}, {-1,1},{-1,-1},{1,1}});
+            case KING -> new Rule(false, new int[][]{{1,0}, {-1,0},{0,1},{0,-1},{1,-1}, {-1,1},{-1,-1},{1,1}});
+            default -> null;
+        };
+//        ChessPiece piece = board.getPiece(myPosition);
+//        if (piece.getPieceType() == PieceType.BISHOP) {
+//            return bishop_movement(board, myPosition);
+//        }
+//        if (piece.getPieceType() == PieceType.KING) {
+//            return king_movement(board, myPosition);
+//        }
+        return rule.getMoves(board, pos);
     }
 
+    private Collection<ChessMove> getMoves(ChessBoard board, ChessPosition pos) {
+
+        return
+    }
 
     private Collection<ChessMove> king_movement(ChessBoard board, ChessPosition myPosition) {
         // Check moving up
