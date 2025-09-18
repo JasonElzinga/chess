@@ -77,10 +77,7 @@ public class ChessPiece {
         return rule.getMoves(board, pos);
     }
 
-    private Collection<ChessMove> getMoves(ChessBoard board, ChessPosition pos) {
 
-        return
-    }
 
     private Collection<ChessMove> king_movement(ChessBoard board, ChessPosition myPosition) {
         // Check moving up
