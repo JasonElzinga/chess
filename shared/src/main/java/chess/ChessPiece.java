@@ -71,13 +71,11 @@ public class ChessPiece {
             return rule.getMoves(board, pos);
         }
         else {
-            return king_movement(board, pos);
+            return pawn_movement(board, pos);
         }
     }
 
-
-
-    private Collection<ChessMove> king_movement(ChessBoard board, ChessPosition pos) {
+    private Collection<ChessMove> pawn_movement(ChessBoard board, ChessPosition pos) {
         // Check moving up
         int row = pos.getRow();
         int col = pos.getColumn();
@@ -154,40 +152,6 @@ public class ChessPiece {
         return posMoves;
     }
 
-
-
-    private Collection<ChessMove> bishop_movement(ChessBoard board, ChessPosition myPosition) {
-        // Check moving up
-        int x = myPosition.getRow();
-        int y = myPosition.getColumn();
-        Collection<ChessMove> lst = new ArrayList<ChessMove>();
-        for (int i = 1; i < 9-y; i++) {
-            // to the left
-            if ((x-i) >= 0) {
-                ChessPosition end = new ChessPosition(x-i, y + i);
-                lst.add((new ChessMove(myPosition, end, null)));
-            }
-            // to the right
-            if ((x+i) <= 8) {
-                ChessPosition end = new ChessPosition(x+i, y + i);
-                lst.add((new ChessMove(myPosition, end, null)));
-            }
-        }
-        // check 1 down
-        for (int i = 1; i < y; i++) {
-            // to the left
-            if ((x-i) >= 0) {
-                ChessPosition end = new ChessPosition(x-i, y-i);
-                lst.add((new ChessMove(myPosition, end, null)));
-            }
-            // to the right
-            if ((x+i) <= 8) {
-                ChessPosition end = new ChessPosition(x+i, y-i);
-                lst.add((new ChessMove(myPosition, end, null)));
-            }
-        }
-        return lst;
-    }
 
     @Override
     public boolean equals(Object o) {
