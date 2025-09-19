@@ -91,7 +91,7 @@ public class ChessPiece {
             offset = 1;
         }
         // check if it hasn't moved
-        if (row == 2 || row==6) {
+        if (row == 2 || row==7) {
             check_moves[0][0] = row + (2*offset);
             check_moves[0][1] = col;
             check_moves[1][0] = row + offset;
@@ -118,14 +118,19 @@ public class ChessPiece {
                 continue;
             } else {
                 ChessPiece target = board.getPiece(newLoc);
-                if (target != null) {
-                    if (thisPiece.getTeamColor() != target.getTeamColor()) {
-                        posMoves.add(new ChessMove(pos, newLoc, null));
+                if (target == null) {
+                    // if attacking but no one there you can't move there
+                    if (new_row != row && new_col != col) {
                         continue;
-                    } else continue;
+                    }
                 }
-                //posMoves.add(new ChessMove(pos, newLoc, null));
+                // check for color
+                else if (thisPiece.getTeamColor() == target.getTeamColor()) {
+                    continue;
+                }
+                posMoves.add(new ChessMove(pos, newLoc, null));
             }
+
         }
         return posMoves;
     }
