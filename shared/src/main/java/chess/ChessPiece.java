@@ -119,7 +119,6 @@ public class ChessPiece {
             } else {
                 ChessPiece target = board.getPiece(newLoc);
                 if (target == null) {
-                    System.out.println("what0");
                     // if attacking but no one there you can't move there
                     if (new_row != row && new_col != col) {
                         continue;
@@ -127,14 +126,10 @@ public class ChessPiece {
                 }
                 // check for color
                 else if (color == target.getTeamColor()) {
-                    System.out.println("what");
-                    System.out.println(target.getTeamColor());
-                    System.out.println(target.getPieceType());
                     continue;
                 }
                 else {
                     // can't capture forward
-                    System.out.println(("what2"));
                     if (new_col == col) {
                         continue;
                     }
@@ -145,9 +140,16 @@ public class ChessPiece {
                         continue;
                     }
                 }
-                posMoves.add(new ChessMove(pos, newLoc, null));
+                if (new_row == 1 || new_row == 8) {
+                    posMoves.add(new ChessMove(pos, newLoc, ChessPiece.PieceType.ROOK));
+                    posMoves.add(new ChessMove(pos, newLoc, ChessPiece.PieceType.KNIGHT));
+                    posMoves.add(new ChessMove(pos, newLoc, ChessPiece.PieceType.BISHOP));
+                    posMoves.add(new ChessMove(pos, newLoc, ChessPiece.PieceType.QUEEN));
+                }
+                else {
+                    posMoves.add(new ChessMove(pos, newLoc, null));
+                }
             }
-
         }
         return posMoves;
     }
