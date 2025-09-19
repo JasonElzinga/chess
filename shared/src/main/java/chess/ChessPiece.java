@@ -119,14 +119,31 @@ public class ChessPiece {
             } else {
                 ChessPiece target = board.getPiece(newLoc);
                 if (target == null) {
+                    System.out.println("what0");
                     // if attacking but no one there you can't move there
                     if (new_row != row && new_col != col) {
                         continue;
                     }
                 }
                 // check for color
-                else if (thisPiece.getTeamColor() == target.getTeamColor()) {
+                else if (color == target.getTeamColor()) {
+                    System.out.println("what");
+                    System.out.println(target.getTeamColor());
+                    System.out.println(target.getPieceType());
                     continue;
+                }
+                else {
+                    // can't capture forward
+                    System.out.println(("what2"));
+                    if (new_col == col) {
+                        continue;
+                    }
+                }
+                if (abs(new_row-row)==2) {
+                    ChessPiece targetOneBefore = board.getPiece(new ChessPosition((row+offset),col));
+                    if (targetOneBefore != null) {
+                        continue;
+                    }
                 }
                 posMoves.add(new ChessMove(pos, newLoc, null));
             }
