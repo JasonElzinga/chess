@@ -102,18 +102,17 @@ public class ChessPiece {
             check_moves[0][1] = col;
         }
 
-
         //attack
-        check_moves[2][0] = row +1;
-        check_moves[2][1] = col +-1;
-        check_moves[3][0] = row +1;
-        check_moves[3][1] = col + +1;
+        check_moves[2][0] = row + offset;
+        check_moves[2][1] = col -1;
+        check_moves[3][0] = row + offset;
+        check_moves[3][1] = col + 1;
 
 
         for (int[] direction : check_moves) {
-            ChessPosition newLoc = new ChessPosition(row + direction[0], col + direction[1]);
-            int new_row = row + direction[0];
-            int new_col = col + direction[1];
+            ChessPosition newLoc = new ChessPosition(direction[0], direction[1]);
+            int new_row = direction[0];
+            int new_col = direction[1];
 
             if (new_col > 8 || new_col < 1 || new_row < 1 || new_row > 8) {
                 continue;
@@ -125,7 +124,7 @@ public class ChessPiece {
                         continue;
                     } else continue;
                 }
-                posMoves.add(new ChessMove(pos, newLoc, null));
+                //posMoves.add(new ChessMove(pos, newLoc, null));
             }
         }
         return posMoves;
