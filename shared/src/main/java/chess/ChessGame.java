@@ -94,14 +94,22 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         Collection<ChessMove> allPosMoves = new ArrayList<ChessMove>();
+        ChessPosition kingPos;
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <=8; j++) {
                 ChessPosition pos = new ChessPosition(i,j);
                 ChessPiece thisPiece = board.getPiece(pos);
 
-                if (thisPiece != null && thisPiece.getTeamColor() != teamColor) {
-                    Collection<ChessMove> posMoves = thisPiece.pieceMoves(board,pos);
-                    allPosMoves.addAll(posMoves);
+                if (thisPiece != null) {
+                    if (thisPiece.getTeamColor() != teamColor) {
+                        Collection<ChessMove> posMoves = thisPiece.pieceMoves(board, pos);
+                        allPosMoves.addAll(posMoves);
+                    }
+                    else {
+                        if (thisPiece.getPieceType() == ChessPiece.PieceType.KING) {
+                            kingPos = new ChessPosition(i,j);
+                        }
+                    }
                 }
             }
         }
