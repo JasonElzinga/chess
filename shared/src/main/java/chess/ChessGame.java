@@ -94,7 +94,9 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         Collection<ChessMove> allPosMoves = new ArrayList<ChessMove>();
-        ChessPosition kingPos;
+        ChessPosition kingPos = null;
+
+        // get the kingPos and also all the enemy posMoves
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <=8; j++) {
                 ChessPosition pos = new ChessPosition(i,j);
@@ -111,6 +113,13 @@ public class ChessGame {
                         }
                     }
                 }
+            }
+        }
+        // check if the king is in check
+
+        for (var move : allPosMoves) {
+            if (move.getEndPosition()==kingPos) {
+                return true;
             }
         }
 
