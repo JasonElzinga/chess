@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -69,6 +70,7 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+
         var startPosition = move.getStartPosition();
         ChessPiece thisPiece = board.getPiece(startPosition);
         var posMoves = thisPiece.pieceMoves(board, startPosition);
@@ -91,7 +93,16 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessMove> allPosMoves = new ArrayList<ChessMove>();
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <=8; j++) {
+                ChessPosition pos = new ChessPosition(i,j);
+                ChessPiece thisPiece = board.getPiece(pos);
+
+                Collection<ChessMove> posMoves = thisPiece.pieceMoves(board,pos);
+                allPosMoves.addAll(posMoves);
+            }
+        }
     }
 
     /**
@@ -121,7 +132,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        var game = new ChessGame();
+        var game = new ChessGame(); //TODO fix
     }
 
     /**
