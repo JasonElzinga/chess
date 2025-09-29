@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -12,9 +13,9 @@ public class ChessGame {
     private final ChessBoard board;
     private final TeamColor team;
 
-    public ChessGame(ChessBoard board) {
-        this.board = board;
+    public ChessGame() {
         this.team = TeamColor.WHITE;
+        this.board = new ChessBoard();
     }
 
     /**
@@ -30,11 +31,11 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        if (team == TeamColor.WHITE) {
-            team = TeamColor.BLACK;
+        if (team == TeamColor.BLACK) {
+            team = TeamColor.WHITE;
         }
         else {
-            team = TeamColor.WHITE;
+            team = TeamColor.BLACK;
         }
     }
 
@@ -68,7 +69,19 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        var startPosition = move.getStartPosition();
+        ChessPiece thisPiece = board.getPiece(startPosition);
+        var posMoves = thisPiece.pieceMoves(board, startPosition);
+        ChessGame.TeamColor color = thisPiece.getTeamColor();
+
+        for (var posMove : posMoves) {
+            if (posMove == move) {
+                if (isInCheck(color)) {
+                    //
+                }
+            }
+        }
+
     }
 
     /**
@@ -108,7 +121,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        // TODO board.resetBoard();
+        var game = new ChessGame();
     }
 
     /**
@@ -126,6 +139,17 @@ public class ChessGame {
         return "ChessGame{}";
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return Objects.equals(board, chessGame.board) && team == chessGame.team;
+    }
 
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(board, team);
+    }
 }
