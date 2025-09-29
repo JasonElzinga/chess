@@ -99,10 +99,14 @@ public class ChessGame {
                 ChessPosition pos = new ChessPosition(i,j);
                 ChessPiece thisPiece = board.getPiece(pos);
 
-                Collection<ChessMove> posMoves = thisPiece.pieceMoves(board,pos);
-                allPosMoves.addAll(posMoves);
+                if (thisPiece != null && thisPiece.getTeamColor() != teamColor) {
+                    Collection<ChessMove> posMoves = thisPiece.pieceMoves(board,pos);
+                    allPosMoves.addAll(posMoves);
+                }
             }
         }
+
+        return false;
     }
 
     /**
