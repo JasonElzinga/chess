@@ -61,7 +61,7 @@ public class ChessBoard implements Cloneable{
     }
 
     @Override
-    protected ChessBoard clone() throws CloneNotSupportedException{
+    protected ChessBoard clone(){
         try {
             ChessBoard cloned = (ChessBoard) super.clone();
 
