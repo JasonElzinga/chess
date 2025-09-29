@@ -11,8 +11,8 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessGame {
-    private final ChessBoard board;
-    private final TeamColor team;
+    private ChessBoard board;
+    private TeamColor team;
 
     public ChessGame() {
         this.team = TeamColor.WHITE;
@@ -55,12 +55,32 @@ public class ChessGame {
      * @return Set of valid moves for requested piece, or null if no piece at
      * startPosition
      */
-    public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        ChessPiece piece = board.getPiece((startPosition));
+    public Collection<ChessMove> validMoves(ChessPosition startPos) throws CloneNotSupportedException {
+
+
+        ChessPiece thisPiece = board.getPiece(startPos);
+        var posMoves = thisPiece.pieceMoves(board, startPos);
+        ChessGame.TeamColor color = thisPiece.getTeamColor();
+
+
+        for (var posMove : posMoves) {
+            ChessBoard tempBoard = board.clone();
+            ChessPosition currentPos = new ChessPosition(startPos.getRow(), startPos.getColumn());
+            var endPos = new ChessPosition(posMove.getEndPosition().getRow(), posMove.getEndPosition().getColumn());
+
+            tempBoard.addPiece(currentPos, null);
+            tempBoard.addPiece(endPos, thisPiece);
+
+            if (isInCheck(color)) {
+
+            }
+        }
+
+        ChessPiece piece = board.getPiece((startPos));
         if (piece == null) {
             return null;
         }
-        return piece.pieceMoves(board, startPosition);
+        return piece.pieceMoves(board, startPos);
     }
 
     /**
@@ -73,16 +93,13 @@ public class ChessGame {
 
         var startPosition = move.getStartPosition();
         ChessPiece thisPiece = board.getPiece(startPosition);
-        var posMoves = thisPiece.pieceMoves(board, startPosition);
-        ChessGame.TeamColor color = thisPiece.getTeamColor();
 
-        for (var posMove : posMoves) {
-            if (posMove == move) {
-                if (isInCheck(color)) {
-                    //
-                }
-            }
+
+        Collection<ChessMove> posMoves = validMoves(startPosition);
+        if (posMoves == null) {
+            throw new InvalidMoveException("There is no piece here");
         }
+
 
     }
 
@@ -93,6 +110,11 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
+        return isInCheckHelper(teamColor, board);
+    }
+
+
+    public boolean isInCheckHelper(TeamColor teamColor, ChessBoard tempBoard) {
         Collection<ChessMove> allPosMoves = new ArrayList<ChessMove>();
         ChessPosition kingPos = null;
 
@@ -100,11 +122,11 @@ public class ChessGame {
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <=8; j++) {
                 ChessPosition pos = new ChessPosition(i,j);
-                ChessPiece thisPiece = board.getPiece(pos);
+                ChessPiece thisPiece = tempBoard.getPiece(pos);
 
                 if (thisPiece != null) {
                     if (thisPiece.getTeamColor() != teamColor) {
-                        Collection<ChessMove> posMoves = thisPiece.pieceMoves(board, pos);
+                        Collection<ChessMove> posMoves = thisPiece.pieceMoves(tempBoard, pos);
                         allPosMoves.addAll(posMoves);
                     }
                     else {
@@ -150,10 +172,20 @@ public class ChessGame {
     /**
      * Sets this game's chessboard with a given board
      *
-     * @param board the new board to use
+     * @param newBoard the new board to use
      */
-    public void setBoard(ChessBoard board) {
-        var game = new ChessGame(); //TODO fix
+    public void setBoard(ChessBoard newBoard) {
+        this.board = newBoard;
+//        for (int i = 1; i <= 8; i++) {
+//            for (int j = 1; j <= 8; j++) {
+//                ChessPosition pos = new ChessPosition(i, j);
+//                ChessPiece thisPiece = board.getPiece(pos);
+//
+//                if (thisPiece != null) {
+//                    newBoard.addPiece(pos, thisPiece);
+//                }
+//            }
+//        }
     }
 
     /**
