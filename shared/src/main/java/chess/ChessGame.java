@@ -32,12 +32,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        if (team == TeamColor.BLACK) {
-            team = TeamColor.WHITE;
-        }
-        else {
-            team = TeamColor.BLACK;
-        }
+        this.team = team;
     }
 
     /**
@@ -95,26 +90,29 @@ public class ChessGame {
 
         var startPos = move.getStartPosition();
         ChessPiece thisPiece = board.getPiece(startPos);
-
+        boolean moved = false;
 
         Collection<ChessMove> posMoves = validMoves(startPos);
-        if (posMoves != move) {
-            throw new InvalidMoveException("No valid moves");
-        }
-        else {
-            ChessPosition currentPos = new ChessPosition(startPos.getRow(), startPos.getColumn());
-            var endPos = new ChessPosition(move.getEndPosition().getRow(), move.getEndPosition().getColumn());
-            var thisType = move.getPromotionPiece();
-            board.addPiece(currentPos, null);
+        for (var posMove : posMoves) {
+            if (posMove.equals(move)) {
+                moved = true;
+                ChessPosition currentPos = new ChessPosition(startPos.getRow(), startPos.getColumn());
+                var endPos = new ChessPosition(posMove.getEndPosition().getRow(), posMove.getEndPosition().getColumn());
+                var thisType = posMove.getPromotionPiece();
+                board.addPiece(currentPos, null);
 
-            if (thisType == null) {
-                board.addPiece(endPos, thisPiece);
-            } else {
-                board.addPiece(endPos, new ChessPiece(thisPiece.getTeamColor(), thisType));
+                if (thisType == null) {
+                    board.addPiece(endPos, thisPiece);
+                } else {
+                    board.addPiece(endPos, new ChessPiece(thisPiece.getTeamColor(), thisType));
+                }
             }
-
+        }
+        if (!moved) {
+            throw new InvalidMoveException();
         }
 
+        this.team = (this.team == TeamColor.BLACK) ? TeamColor.WHITE : TeamColor.BLACK;
         setTeamTurn(team);
     }
 
