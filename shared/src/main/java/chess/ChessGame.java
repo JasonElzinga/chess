@@ -53,7 +53,7 @@ public class ChessGame {
     public Collection<ChessMove> validMoves(ChessPosition startPos) {
         ChessPiece thisPiece = board.getPiece(startPos);
         Collection<ChessMove> validMoves = new ArrayList<>();
-        if (thisPiece == null) {
+        if (thisPiece == null || thisPiece.getTeamColor() != team) {
             return validMoves;
         }
         Collection<ChessMove> posMoves = thisPiece.pieceMoves(board, startPos);
