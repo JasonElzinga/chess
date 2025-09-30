@@ -53,7 +53,7 @@ public class ChessGame {
     public Collection<ChessMove> validMoves(ChessPosition startPos) {
         ChessPiece thisPiece = board.getPiece(startPos);
         Collection<ChessMove> validMoves = new ArrayList<>();
-        if (thisPiece == null || thisPiece.getTeamColor() != team) {
+        if (thisPiece == null) {
             return validMoves;
         }
         Collection<ChessMove> posMoves = thisPiece.pieceMoves(board, startPos);
@@ -91,6 +91,10 @@ public class ChessGame {
         var startPos = move.getStartPosition();
         ChessPiece thisPiece = board.getPiece(startPos);
         boolean moved = false;
+
+        if (thisPiece == null || thisPiece.getTeamColor() != team) {
+            throw new InvalidMoveException();
+        }
 
         Collection<ChessMove> posMoves = validMoves(startPos);
         for (var posMove : posMoves) {
