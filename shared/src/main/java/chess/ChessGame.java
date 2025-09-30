@@ -118,6 +118,7 @@ public class ChessGame {
 
         this.team = (this.team == TeamColor.BLACK) ? TeamColor.WHITE : TeamColor.BLACK;
         setTeamTurn(team);
+
     }
 
     /**
