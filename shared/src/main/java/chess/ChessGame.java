@@ -17,6 +17,7 @@ public class ChessGame {
     public ChessGame() {
         this.team = TeamColor.WHITE;
         this.board = new ChessBoard();
+        board.resetBoard();
     }
 
     /**
@@ -51,23 +52,28 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPos) {
-        ChessPiece thisPiece = board.getPiece(startPos);
+        return validMovesHelper(startPos, board);
+    }
+
+    private Collection<ChessMove> validMovesHelper(ChessPosition startPos, ChessBoard chessBoardToUse) {
+        ChessPiece thisPiece = chessBoardToUse.getPiece(startPos);
         Collection<ChessMove> validMoves = new ArrayList<>();
         if (thisPiece == null) {
             return validMoves;
         }
-        Collection<ChessMove> posMoves = thisPiece.pieceMoves(board, startPos);
+        Collection<ChessMove> posMoves = thisPiece.pieceMoves(chessBoardToUse, startPos);
         ChessGame.TeamColor color = thisPiece.getTeamColor();
 
 
         try {
             for (var posMove : posMoves) {
-                ChessBoard tempBoard = (ChessBoard) board.clone();
-                ChessPosition currentPos = new ChessPosition(startPos.getRow(), startPos.getColumn());
+                ChessBoard tempBoard = (ChessBoard) chessBoardToUse.clone();
+                var currentPos = new ChessPosition(startPos.getRow(), startPos.getColumn());
                 var endPos = new ChessPosition(posMove.getEndPosition().getRow(), posMove.getEndPosition().getColumn());
 
-                tempBoard.addPiece(endPos, thisPiece);
-                tempBoard.addPiece(currentPos, null);
+
+                tempBoard.addPiece(endPos, new ChessPiece(thisPiece.getTeamColor(), thisPiece.getPieceType()));
+                tempBoard.addPiece(currentPos,null);
 
                 if (!isInCheckHelper(color, tempBoard)) {
                     validMoves.add(posMove);
@@ -181,25 +187,6 @@ public class ChessGame {
         return false;
     }
 
-//    private boolean isInCheckMateHelper(TeamColor teamColor, ChessBoard tempBoard) {
-//        if (!isInCheck(teamColor)) {
-//            return false;
-//        }
-//        Collection<ChessMove> allPosMoves = new ArrayList<ChessMove>();
-//
-//        // get the kingPos and also all the enemy posMoves
-//        for (int i = 1; i <= 8; i++) {
-//            for (int j = 1; j <=8; j++) {
-//                Collection<ChessMove> posMoves = validMoves(new ChessPosition(i,j));
-//                if (posMoves != null) {
-//                    return false;
-//                }
-//            }
-//        }
-//
-//        return true;
-//    }
-
     /**
      * Determines if the given team is in stalemate, which here is defined as having
      * no valid moves while not in check.
@@ -225,17 +212,17 @@ public class ChessGame {
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <= 8; j++) {
                 ChessPosition currentPos = new ChessPosition(i,j);
-                ChessPiece thisPiece = board.getPiece(currentPos);
+                ChessPiece thisPiece = tempBoard.getPiece(currentPos);
                 if (thisPiece != null && thisPiece.getTeamColor() == teamColor) {
-                    Collection<ChessMove> posMoves = validMoves(new ChessPosition(i, j));
-                    if (posMoves != null) {
-                        return false;
+                    Collection<ChessMove> posMoves = validMovesHelper(new ChessPosition(i, j), tempBoard);
+                    if (!posMoves.isEmpty()) {
+                        return true;
                     }
                 }
             }
         }
 
-        return true;
+        return false;
     }
     /**
      * Sets this game's chessboard with a given board
@@ -265,10 +252,12 @@ public class ChessGame {
         return board;
     }
 
-
     @Override
     public String toString() {
-        return "ChessGame{}";
+        return "ChessGame{" +
+                "board=" + board +
+                ", team=" + team +
+                '}';
     }
 
     @Override
