@@ -20,6 +20,6 @@ public class MemoryDataAccess implements DataAccess{
 
     @Override
     public void clear() {
-        //TODO delete everything
+        users.clear();
     }
 }
