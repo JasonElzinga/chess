@@ -18,6 +18,9 @@ public class ServiceTest {
         Assertions.assertNotNull(res);
         Assertions.assertEquals("cow", res.username());
         Assertions.assertEquals("zyyz", res.authToken());
+        Assertions.assertNotEquals("zyyz", res.username());
+        Assertions.assertNotEquals(null, res.username());
+        Assertions.assertNotEquals(null, res.authToken());
 
     }
 }
