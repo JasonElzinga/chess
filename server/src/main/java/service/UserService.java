@@ -1,5 +1,6 @@
 package service;
 import dataaccess.DataAccess;
+import model.RegisterResponse;
 import model.UserData;
 
 public class UserService {
@@ -7,8 +8,12 @@ public class UserService {
     public UserService(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
     }
-    public UserData register(UserData user) {
-        dataAccess.saveUser(user.username());
-        return new RegistrationResult(user.username(), "zyyz");
+
+
+    public RegisterResponse register(UserData user) {
+        dataAccess.createUser(user);
+        return new RegisterResponse(user.username(), "zyyz");
     }
+
+
 }

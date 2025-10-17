@@ -9,13 +9,13 @@ public class MemoryDataAccess implements DataAccess{
 
 
     @Override
-    public void getUser(String username) {
-        users.get(username);
+    public UserData getUser(String username) {
+        return users.get(username);
     }
 
     @Override
-    public void saveUser(String username) {
-
+    public void createUser(UserData user) {
+        users.put(user.username(), user);
     }
 
     @Override

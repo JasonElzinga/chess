@@ -16,5 +16,8 @@ public class ServiceTest {
         var res = userService.register(new UserData("cow", "rat", "john"));
 
         Assertions.assertNotNull(res);
+        Assertions.assertEquals("cow", res.username());
+        Assertions.assertEquals("zyyz", res.authToken());
+
     }
 }

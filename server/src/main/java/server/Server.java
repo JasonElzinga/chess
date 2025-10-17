@@ -15,27 +15,27 @@ public class Server {
     private DataAccess dataAccess;
 
     public Server() {
-        var dataAccess = new MemoryDataAccess();
-        var service = new UserService(dataAccess);
+        this.dataAccess = new MemoryDataAccess();
+        this.userService = new UserService(dataAccess);
+
         server = Javalin.create(config -> config.staticFiles.add("web"));
         server.delete("db", ctx -> ctx.result("{}"));
 
-        //server.post("user", this::register);
+        server.post("user", this::register);
         // Register your endpoints and exception handlers here.
 
     }
 
 
-    private void register(Context cxt) {
+    private void register(Context ctx) {
         var serializer = new Gson();
-        String reqJson = cxt.body();
+        var reqJson = ctx.body();
         var req = serializer.fromJson(reqJson, UserData.class);
-        //req.put("authToken", "cow");
-        //var user = req.username;
 
+        var res = userService.register(req);
 
-        //var res = userService.register(req);
-        //cxt.result(serializer.toJson(res));
+        ctx.result(serializer.toJson(res));
+        ctx.status(200);
     }
 
     public int run(int desiredPort) {
