@@ -2,7 +2,7 @@ package passoff.dataaccess;
 
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
-import datamodel.UserData;
+import model.model.UserData;
 import org.junit.jupiter.api.*;
 
 //import static org.junit.jupiter.api.Assertions.assertNotNull;

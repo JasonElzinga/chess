@@ -3,7 +3,7 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
-import datamodel.UserData;
+import model.model.UserData;
 import io.javalin.*;
 import io.javalin.http.Context;
 import service.UserService;

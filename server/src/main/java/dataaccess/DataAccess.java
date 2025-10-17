@@ -1,6 +1,6 @@
 package dataaccess;
 
-import datamodel.UserData;
+import model.model.UserData;
 
 public interface DataAccess {
     void clear();
