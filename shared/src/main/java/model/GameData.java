@@ -1,4 +1,4 @@
-package model.model;
+package model;
 
 public record GameData() {
 }

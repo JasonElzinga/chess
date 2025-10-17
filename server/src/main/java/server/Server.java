@@ -3,7 +3,7 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
-import model.model.UserData;
+import model.UserData;
 import io.javalin.*;
 import io.javalin.http.Context;
 import service.UserService;
@@ -15,12 +15,12 @@ public class Server {
     private DataAccess dataAccess;
 
     public Server() {
-        userService = new UserService();
-        dataAccess = new MemoryDataAccess(dataAccess);
+        var dataAccess = new MemoryDataAccess();
+        var service = new UserService(dataAccess);
         server = Javalin.create(config -> config.staticFiles.add("web"));
         server.delete("db", ctx -> ctx.result("{}"));
 
-        server.post("user", this::register);
+        //server.post("user", this::register);
         // Register your endpoints and exception handlers here.
 
     }
@@ -34,8 +34,8 @@ public class Server {
         //var user = req.username;
 
 
-        var res = userService.register(req);
-        cxt.result(serializer.toJson(res));
+        //var res = userService.register(req);
+        //cxt.result(serializer.toJson(res));
     }
 
     public int run(int desiredPort) {

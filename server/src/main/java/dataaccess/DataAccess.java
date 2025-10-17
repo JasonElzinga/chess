@@ -1,9 +1,9 @@
 package dataaccess;
 
-import model.model.UserData;
+import model.UserData;
 
 public interface DataAccess {
     void clear();
-    void User(UserData user);
     void getUser(String username);
+    void saveUser(String username);
 }

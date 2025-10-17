@@ -1,6 +1,6 @@
 package dataaccess;
 
-import model.model.UserData;
+import model.UserData;
 
 import java.util.HashMap;
 
@@ -9,12 +9,17 @@ public class MemoryDataAccess implements DataAccess{
 
 
     @Override
-    public void saveUser(UserData user) {
-        users.put(user.username(), user);
+    public void getUser(String username) {
+        users.get(username);
     }
 
     @Override
-    public void getUser(String username) {
-        users.get(username);
+    public void saveUser(String username) {
+
+    }
+
+    @Override
+    public void clear() {
+        //TODO delete everything
     }
 }

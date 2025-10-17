@@ -1,7 +1,7 @@
 package service;
 
 import dataaccess.MemoryDataAccess;
-import model.model.UserData;
+import model.UserData;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

@@ -1,7 +1,7 @@
 package ServiceTests;
 
 import dataaccess.MemoryDataAccess;
-import model.model.UserData;
+import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import service.UserService;
