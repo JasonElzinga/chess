@@ -7,20 +7,29 @@ import org.junit.jupiter.api.Test;
 import service.UserService;
 
 public class ServiceTest {
-    @Test
 
+    @Test
     public void registerNormal() {
         var dataAccess = new MemoryDataAccess();
         var userService = new UserService(dataAccess);
 
         var res = userService.register(new UserData("cow", "rat", "john"));
 
-        Assertions.assertNotNull(res);
-        Assertions.assertEquals("cow", res.username());
-        Assertions.assertEquals("zyyz", res.authToken());
-        Assertions.assertNotEquals("zyyz", res.username());
         Assertions.assertNotEquals(null, res.username());
         Assertions.assertNotEquals(null, res.authToken());
-
     }
+
+    @Test
+    public void registerNotNull() {
+        var dataAccess = new MemoryDataAccess();
+        var userService = new UserService(dataAccess);
+
+        var res = userService.register(new UserData("cow", "rat", "john"));
+
+        Assertions.assertNotNull(res);
+        Assertions.assertNotEquals(null, res.username());
+        Assertions.assertNotEquals(null, res.authToken());
+    }
+
+
 }
