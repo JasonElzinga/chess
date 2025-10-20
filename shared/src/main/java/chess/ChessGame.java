@@ -147,16 +147,16 @@ public class ChessGame {
                 ChessPosition pos = new ChessPosition(i,j);
                 ChessPiece thisPiece = tempBoard.getPiece(pos);
 
-                if (thisPiece != null) {
-                    if (thisPiece.getTeamColor() != teamColor) {
-                        Collection<ChessMove> posMoves = thisPiece.pieceMoves(tempBoard, pos);
-                        allPosMoves.addAll(posMoves);
-                    }
-                    else {
-                        if (thisPiece.getPieceType() == ChessPiece.PieceType.KING) {
-                            kingPos = new ChessPosition(i,j);
-                        }
-                    }
+                if (thisPiece == null) {
+                    continue;
+                }
+                if (thisPiece.getTeamColor() != teamColor) {
+                    Collection<ChessMove> posMoves = thisPiece.pieceMoves(tempBoard, pos);
+                    allPosMoves.addAll(posMoves);
+                    continue;
+                }
+                if (thisPiece.getPieceType() == ChessPiece.PieceType.KING) {
+                    kingPos = new ChessPosition(i,j);
                 }
             }
         }
