@@ -1,4 +1,4 @@
-package ServiceTests;
+package servicetests;
 
 import dataaccess.MemoryDataAccess;
 import model.UserData;

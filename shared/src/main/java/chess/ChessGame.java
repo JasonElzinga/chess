@@ -206,8 +206,6 @@ public class ChessGame {
 
     private boolean canMove(TeamColor teamColor, ChessBoard tempBoard) {
 
-        //Collection<ChessMove> allPosMoves = new ArrayList<ChessMove>();
-
         // get the kingPos and also all the enemy posMoves
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <= 8; j++) {
@@ -231,16 +229,6 @@ public class ChessGame {
      */
     public void setBoard(ChessBoard newBoard) {
         this.board = newBoard;
-//        for (int i = 1; i <= 8; i++) {
-//            for (int j = 1; j <= 8; j++) {
-//                ChessPosition pos = new ChessPosition(i, j);
-//                ChessPiece thisPiece = board.getPiece(pos);
-//
-//                if (thisPiece != null) {
-//                    newBoard.addPiece(pos, thisPiece);
-//                }
-//            }
-//        }
     }
 
     /**

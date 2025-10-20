@@ -71,18 +71,18 @@ public class ChessPiece {
             return rule.getMoves(board, pos);
         }
         else {
-            return pawn_movement(board, pos);
+            return pawnMovement(board, pos);
         }
     }
 
-    private Collection<ChessMove> pawn_movement(ChessBoard board, ChessPosition pos) {
+    private Collection<ChessMove> pawnMovement(ChessBoard board, ChessPosition pos) {
         // Check moving up
         int row = pos.getRow();
         int col = pos.getColumn();
         ChessPiece thisPiece = board.getPiece(pos);
         ChessGame.TeamColor color = thisPiece.getTeamColor();
         Collection<ChessMove> posMoves = new ArrayList<ChessMove>();
-        int[][] check_moves = new int[4][4];
+        int[][] checkMoves = new int[4][4];
         int offset = -1;
 
         if (color == ChessGame.TeamColor.WHITE) {
@@ -90,35 +90,35 @@ public class ChessPiece {
         }
         // check if it hasn't moved
         if (row == 2 || row==7) {
-            check_moves[0][0] = row + (2*offset);
-            check_moves[0][1] = col;
-            check_moves[1][0] = row + offset;
-            check_moves[1][1] = col;
+            checkMoves[0][0] = row + (2*offset);
+            checkMoves[0][1] = col;
+            checkMoves[1][0] = row + offset;
+            checkMoves[1][1] = col;
         }
         else {
-            check_moves[0][0] = row + offset;
-            check_moves[0][1] = col;
+            checkMoves[0][0] = row + offset;
+            checkMoves[0][1] = col;
         }
 
         //attack
-        check_moves[2][0] = row + offset;
-        check_moves[2][1] = col -1;
-        check_moves[3][0] = row + offset;
-        check_moves[3][1] = col + 1;
+        checkMoves[2][0] = row + offset;
+        checkMoves[2][1] = col -1;
+        checkMoves[3][0] = row + offset;
+        checkMoves[3][1] = col + 1;
 
 
-        for (int[] direction : check_moves) {
+        for (int[] direction : checkMoves) {
             ChessPosition newLoc = new ChessPosition(direction[0], direction[1]);
-            int new_row = direction[0];
-            int new_col = direction[1];
+            int newRow = direction[0];
+            int newCol = direction[1];
 
-            if (new_col > 8 || new_col < 1 || new_row < 1 || new_row > 8) {
+            if (newCol > 8 || newCol < 1 || newRow < 1 || newRow > 8) {
                 continue;
             } else {
                 ChessPiece target = board.getPiece(newLoc);
                 if (target == null) {
                     // if attacking but no one there you can't move there
-                    if (new_row != row && new_col != col) {
+                    if (newRow != row && newCol != col) {
                         continue;
                     }
                 }
@@ -128,17 +128,17 @@ public class ChessPiece {
                 }
                 else {
                     // can't capture forward
-                    if (new_col == col) {
+                    if (newCol == col) {
                         continue;
                     }
                 }
-                if (abs(new_row-row)==2) {
+                if (abs(newRow-row)==2) {
                     ChessPiece targetOneBefore = board.getPiece(new ChessPosition((row+offset),col));
                     if (targetOneBefore != null) {
                         continue;
                     }
                 }
-                if (new_row == 1 || new_row == 8) {
+                if (newRow == 1 || newRow == 8) {
                     posMoves.add(new ChessMove(pos, newLoc, ChessPiece.PieceType.ROOK));
                     posMoves.add(new ChessMove(pos, newLoc, ChessPiece.PieceType.KNIGHT));
                     posMoves.add(new ChessMove(pos, newLoc, ChessPiece.PieceType.BISHOP));
