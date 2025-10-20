@@ -2,7 +2,6 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class Rule {
 
@@ -15,59 +14,60 @@ public class Rule {
     }
 
 
-    public Collection<ChessMove> getMoves(ChessBoard board, ChessPosition pos) {
-        Collection<ChessMove> posMoves = new ArrayList<ChessMove>();
-        ChessPiece thisPiece = board.getPiece(pos);
+    public Collection<ChessMove> getMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> posMoves = new ArrayList<>();
+        ChessPiece thisPiece = board.getPiece(myPosition);
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
 
-        int col = pos.getColumn();
-        int row = pos.getRow();
+        for (var direction: directions) {
+            int newRow = row + direction[0];
+            int newCol = col + direction[1];
+            ChessPosition targetLoc = new ChessPosition(newRow, newCol);
 
-            // pieces that move once
-            for (int[] direction : directions) {
-                ChessPosition newLoc = new ChessPosition(row + direction[0], col + direction[1]);
-                int new_row = row + direction[0];
-                int new_col = col + direction[1];
+            if (newRow > 8 || newCol > 8 || newRow < 1 || newCol < 1) {
+                continue;
+            }
+            ChessPiece target = board.getPiece(targetLoc);
 
-                // check bounds
-                if (new_col > 8 || new_col < 1 || new_row < 1 || new_row > 8) {
+            if (target !=null) {
+                if (target.getTeamColor() == thisPiece.getTeamColor()) {
                     continue;
-                } else {
-                    // check if the target location as an enemy piece
-                    ChessPiece target = board.getPiece(newLoc);
-                    if (target != null) {
-                        if (thisPiece.getTeamColor() != target.getTeamColor()) {
-                            posMoves.add(new ChessMove(pos, newLoc, null));
-                            continue;
-                        }
-                        else continue;
-                    }
-                    posMoves.add(new ChessMove(pos, newLoc, null));
                 }
-
-                // check for moves for pieces that move more than once
-                if (repeat) {
-                    //int new_row  = new_row + direction[0];
-                    //int new_col = new_col + direction[1];
-                    while (true) {
-                        new_row += direction[0];
-                        new_col += direction[1];
-                        ChessPosition recursiveLoc = new ChessPosition(new_row, new_col);
-                        if (new_col > 8 || new_col < 1 || new_row > 8 || new_row < 1) break;
-
-                        else {
-                            ChessPiece target = board.getPiece(recursiveLoc);
-                            if (target != null) {
-                                if (thisPiece.getTeamColor() != target.getTeamColor()) {
-                                    posMoves.add(new ChessMove(pos, recursiveLoc, null));
-                                    break;
-                                }
-                                break;
-                            }
-                        }
-                        posMoves.add(new ChessMove(pos, recursiveLoc, null));
-                    }
+                else {
+                    posMoves.add(new ChessMove(myPosition,targetLoc,null));
+                    continue;
                 }
             }
+            posMoves.add(new ChessMove(myPosition,targetLoc,null));
+
+            if (repeat) {
+                while (true) {
+                    newRow += direction[0];
+                    newCol += direction[1];
+
+                    targetLoc = new ChessPosition(newRow, newCol);
+
+                    if (newRow > 8 || newCol > 8 || newRow < 1 || newCol < 1) {
+                        break;
+                    }
+                    target = board.getPiece(targetLoc);
+
+                    if (target !=null) {
+                        if (target.getTeamColor() == thisPiece.getTeamColor()) {
+                            break;
+                        }
+                        else {
+                            posMoves.add(new ChessMove(myPosition,targetLoc,null));
+                            break;
+                        }
+                    }
+                    posMoves.add(new ChessMove(myPosition,targetLoc,null));
+
+                }
+            }
+        }
         return posMoves;
     }
+
 }
