@@ -41,30 +41,31 @@ public class Rule {
             }
             posMoves.add(new ChessMove(myPosition,targetLoc,null));
 
-            if (repeat) {
-                while (true) {
-                    newRow += direction[0];
-                    newCol += direction[1];
+            if (!repeat) {
+                continue;
+            }
+            while (true) {
+                newRow += direction[0];
+                newCol += direction[1];
 
-                    targetLoc = new ChessPosition(newRow, newCol);
+                targetLoc = new ChessPosition(newRow, newCol);
 
-                    if (newRow > 8 || newCol > 8 || newRow < 1 || newCol < 1) {
+                if (newRow > 8 || newCol > 8 || newRow < 1 || newCol < 1) {
+                    break;
+                }
+                target = board.getPiece(targetLoc);
+
+                if (target !=null) {
+                    if (target.getTeamColor() == thisPiece.getTeamColor()) {
                         break;
                     }
-                    target = board.getPiece(targetLoc);
-
-                    if (target !=null) {
-                        if (target.getTeamColor() == thisPiece.getTeamColor()) {
-                            break;
-                        }
-                        else {
-                            posMoves.add(new ChessMove(myPosition,targetLoc,null));
-                            break;
-                        }
+                    else {
+                        posMoves.add(new ChessMove(myPosition,targetLoc,null));
+                        break;
                     }
-                    posMoves.add(new ChessMove(myPosition,targetLoc,null));
-
                 }
+                posMoves.add(new ChessMove(myPosition,targetLoc,null));
+
             }
         }
         return posMoves;
