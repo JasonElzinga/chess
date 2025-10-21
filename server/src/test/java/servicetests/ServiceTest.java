@@ -1,5 +1,6 @@
 package servicetests;
 
+import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import model.IndividualGameData;
@@ -14,7 +15,21 @@ import service.UserService;
 import javax.xml.crypto.Data;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 public class ServiceTest {
+
+    @Test
+    void clear() {
+        var user = new UserData("joe", "j@j", "j");
+        DataAccess da = new MemoryDataAccess();
+        da.createUser(user);
+        assertNotNull(da.getUser(user.username()));
+        da.clear();
+        assertNull(da.getUser(user.username()));
+    }
+
 
     @Test
     public void registerNormal() throws DataAccessException {
@@ -62,7 +77,7 @@ public class ServiceTest {
 
         userService.register((new UserData("cow1", "rat1", "cow1@bob")));
         var res = userService.login(new UserData("cow1", "rat1", null));
-        System.out.println(res.username());
+        //System.out.println(res.username());
         Assertions.assertEquals("cow1", res.username());
         Assertions.assertNotNull(res.authToken());
 
@@ -162,14 +177,17 @@ public class ServiceTest {
         var userService = new UserService(dataAccess);
 
         var res = userService.register(new UserData("bob", "123", "jason@mail"));
+        var res1 = userService.register(new UserData("bob2", "123", "bob2@mail"));
         userService.createGame("Epic Game", res.authToken());
         userService.joinGame("WHITE", 1234, res.authToken());
+        userService.joinGame("BLACK",1234, res1.authToken());
 
-        var res1 = userService.listGames(res.authToken());
-        var expectedGame = new ListGameResponse(List.of(new IndividualGameData(1234, "bob", null, "Epic Game")));
+        var res2 = userService.listGames(res.authToken());
+        var expectedGame = new ListGameResponse(List.of
+                (new IndividualGameData(1234, "bob", "bob2", "Epic Game")));
 
-        Assertions.assertNotNull(res1);
-        Assertions.assertEquals(expectedGame, res1);
+        Assertions.assertNotNull(res2);
+        Assertions.assertEquals(expectedGame, res2);
     }
 
     @Test
@@ -183,7 +201,7 @@ public class ServiceTest {
 
         Assertions.assertThrows(DataAccessException.class, ()-> {
             userService.joinGame(null, 1234, res.authToken());
-            //userService.joinGame("WHITE", 1234, res.authToken());
+            userService.joinGame("WHITE", 1234, res.authToken());
             userService.joinGame("WHITE", 1234, "Fake authToken");
         });
     }
