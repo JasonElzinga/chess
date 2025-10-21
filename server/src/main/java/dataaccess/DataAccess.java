@@ -11,6 +11,5 @@ public interface DataAccess {
     void storeAuth(AuthData auth);
     AuthData getAuthData(String authToken);
     void deleteAuthData(AuthData auth);
-
     CreateGameResponse createGame(String gameName);
 }

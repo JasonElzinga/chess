@@ -60,9 +60,13 @@ public class UserService {
     }
 
     public CreateGameResponse createGame(String gameName, String authToken) throws DataAccessException{
+        if (gameName == null) {
+            throw new DataAccessException("Error: Bad Request");
+        }
         var authData = getAuthData(authToken);
 
-        gameID = dataAccess.createGame(gameName);
+        var createGameResponse = dataAccess.createGame(gameName);
+        return createGameResponse;
     }
 
     private AuthData getAuthData(String authToken) throws DataAccessException{

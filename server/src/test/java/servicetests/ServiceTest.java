@@ -9,6 +9,8 @@ import passoff.model.TestAuthResult;
 import passoff.model.TestCreateResult;
 import service.UserService;
 
+import javax.xml.crypto.Data;
+
 public class ServiceTest {
 
     @Test
@@ -92,17 +94,17 @@ public class ServiceTest {
         userService.logout(res.authToken());
     }
 
-    public void createGameSuccess() {
-        var dataAccess = new MemoryDataAccess();
-        var userService = new UserService(dataAccess);
-
-
-        var res = userService.createGame("Epic Game");
-
-
-        assertHttpOk(createResult);
-        Assertions.assertNotNull(createResult.getGameID(), "Result did not return a game ID");
-        Assertions.assertTrue(createResult.getGameID() > 0, "Result returned invalid game ID");
-    }
+//    public void createGameSuccess() throws DataAccessException {
+//        var dataAccess = new MemoryDataAccess();
+//        var userService = new UserService(dataAccess);
+//
+//        var res = userService.register(new UserData("jason", "123", "jason@mail"));
+//        var res1 = userService.createGame("Epic Game", );
+//
+//
+//        //assertHttpOk(createResult);
+//        Assertions.assertNotNull(createResult.getGameID(), "Result did not return a game ID");
+//        Assertions.assertTrue(createResult.getGameID() > 0, "Result returned invalid game ID");
+//    }
 
 }

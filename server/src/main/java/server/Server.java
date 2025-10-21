@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
+import model.CreateGameRequest;
 import model.UserData;
 import io.javalin.*;
 import io.javalin.http.Context;
@@ -36,10 +37,11 @@ public class Server {
     private void createGame(@NotNull Context ctx) {
         var serializer = new Gson();
         var reqJson = ctx.body();
-        var req = serializer.fromJson(reqJson, UserData.class);
+        var req = serializer.fromJson(reqJson, CreateGameRequest.class);
+        var authToken = ctx.header("authorization");
 
         try {
-            var res = userService.register(req);
+            var res = userService.createGame(req.gameName(), authToken);
             ctx.result(serializer.toJson(res));
             ctx.status(200);
         } catch (DataAccessException e) {
@@ -49,7 +51,7 @@ public class Server {
             if (e.getMessage().equals("Error: Bad Request")) {
                 ctx.status(400);
             } else {
-                ctx.status(403);
+                ctx.status(401);
             }
         }
     }
