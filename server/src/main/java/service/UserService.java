@@ -34,9 +34,6 @@ public class UserService {
         if (user == null || user.username() == null || user.password() == null) {
             throw new DataAccessException("Error: Bad Request");
         }
-//        if (dataAccess.getUser(user.username()) != null) {
-//            throw new DataAccessException("Error: Username already taken");
-//      }
 
         var actualUser = dataAccess.getUser(user.username());
         if (actualUser == null || (!actualUser.password().equals(user.password()))) {
