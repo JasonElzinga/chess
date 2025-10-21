@@ -4,8 +4,9 @@ import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import model.UserData;
 import org.eclipse.jetty.server.Authentication;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import passoff.model.TestAuthResult;
+import passoff.model.TestCreateResult;
 import service.UserService;
 
 public class ServiceTest {
@@ -91,5 +92,17 @@ public class ServiceTest {
         userService.logout(res.authToken());
     }
 
+    public void createGameSuccess() {
+        var dataAccess = new MemoryDataAccess();
+        var userService = new UserService(dataAccess);
+
+
+        var res = userService.createGame("Epic Game");
+
+
+        assertHttpOk(createResult);
+        Assertions.assertNotNull(createResult.getGameID(), "Result did not return a game ID");
+        Assertions.assertTrue(createResult.getGameID() > 0, "Result returned invalid game ID");
+    }
 
 }

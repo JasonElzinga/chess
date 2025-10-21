@@ -1,6 +1,8 @@
 package dataaccess;
 
 import model.AuthData;
+import model.CreateGameResponse;
+import model.GameData;
 import model.UserData;
 
 import java.util.HashMap;
@@ -8,7 +10,7 @@ import java.util.HashMap;
 public class MemoryDataAccess implements DataAccess{
     private HashMap<String, UserData> users = new HashMap<>();
     private HashMap<String, AuthData> authData = new HashMap<>();
-
+    private HashMap<String, GameData> gameData = new HashMap<>();
 
     @Override
     public UserData getUser(String username) {
@@ -38,6 +40,13 @@ public class MemoryDataAccess implements DataAccess{
     @Override
     public void deleteAuthData(AuthData auth) {
         authData.remove(auth.authToken());
+    }
+
+    @Override
+    public CreateGameResponse createGame(String gameName) {
+
+
+        return new CreateGameResponse();
     }
 
 }

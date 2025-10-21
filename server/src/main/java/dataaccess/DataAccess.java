@@ -1,6 +1,7 @@
 package dataaccess;
 
 import model.AuthData;
+import model.CreateGameResponse;
 import model.UserData;
 
 public interface DataAccess {
@@ -10,4 +11,6 @@ public interface DataAccess {
     void storeAuth(AuthData auth);
     AuthData getAuthData(String authToken);
     void deleteAuthData(AuthData auth);
+
+    CreateGameResponse createGame(String gameName);
 }

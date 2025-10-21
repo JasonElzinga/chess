@@ -2,10 +2,8 @@ package service;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
-import model.AuthData;
-import model.LoginResponse;
-import model.RegisterResponse;
-import model.UserData;
+import model.*;
+
 import java.util.UUID;
 
 public class UserService {
@@ -57,21 +55,26 @@ public class UserService {
 
 
     public void logout(String authToken) throws DataAccessException {
+        var authData = getAuthData(authToken);
+        dataAccess.deleteAuthData(authData);
+    }
+
+    public CreateGameResponse createGame(String gameName, String authToken) throws DataAccessException{
+        var authData = getAuthData(authToken);
+
+        gameID = dataAccess.createGame(gameName);
+    }
+
+    private AuthData getAuthData(String authToken) throws DataAccessException{
         if (authToken == null) {
-            throw new DataAccessException("Error: unauthorized");
+            throw new DataAccessException("Error: Bad Request");
         }
 
         var authData = dataAccess.getAuthData(authToken);
         if (authData == null) {
             throw new DataAccessException("Error: unauthorized");
         }
-
-        dataAccess.deleteAuthData(authData);
-    }
-
-
-    public String getUser(UserData users) {
-        return users.username();
+        return authData;
     }
 
     public void clear() throws DataAccessException{
