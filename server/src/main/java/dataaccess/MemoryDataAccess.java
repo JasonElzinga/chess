@@ -1,11 +1,13 @@
 package dataaccess;
 
+import model.AuthData;
 import model.UserData;
 
 import java.util.HashMap;
 
 public class MemoryDataAccess implements DataAccess{
     private HashMap<String, UserData> users = new HashMap<>();
+    private HashMap<String, AuthData> authData = new HashMap<>();
 
 
     @Override
@@ -22,4 +24,10 @@ public class MemoryDataAccess implements DataAccess{
     public void clear() {
         users.clear();
     }
+
+    @Override
+    public void storeAuth(AuthData auth) {
+        authData.put(auth.username(), auth);
+    }
+
 }
