@@ -1,4 +1,4 @@
-package servicetests;
+package service;
 
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
@@ -8,7 +8,6 @@ import model.ListGameResponse;
 import model.UserData;
 
 import org.junit.jupiter.api.*;
-import service.UserService;
 
 import java.util.List;
 
