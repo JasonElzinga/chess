@@ -1,6 +1,7 @@
 package service;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
+import dataaccess.MemoryDataAccess;
 import model.AuthData;
 import model.LoginResponse;
 import model.RegisterResponse;
@@ -55,9 +56,25 @@ public class UserService {
     }
 
 
+    public void logout(String authToken) throws DataAccessException {
+        if (authToken == null) {
+            throw new DataAccessException("Error: unauthorized");
+        }
+
+        var authData = dataAccess.getAuthData(authToken);
+        if (authData == null) {
+            throw new DataAccessException("Error: unauthorized");
+        }
+
+        dataAccess.deleteAuthData(authData);
+    }
+
 
     public String getUser(UserData users) {
         return users.username();
     }
 
+    public void clear() throws DataAccessException{
+        dataAccess.clear();
+    }
 }

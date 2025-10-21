@@ -3,6 +3,7 @@ package servicetests;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import model.UserData;
+import org.eclipse.jetty.server.Authentication;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import service.UserService;
@@ -66,10 +67,28 @@ public class ServiceTest {
         var dataAccess = new MemoryDataAccess();
         var userService = new UserService(dataAccess);
 
-
         Assertions.assertThrows(DataAccessException.class, ()-> {
             userService.login(new UserData("cow", "fakepassword", null));
         });
+    }
+
+    @Test
+    public void badLogout() throws DataAccessException {
+        var dataAccess = new MemoryDataAccess();
+        var userService = new UserService(dataAccess);
+
+        Assertions.assertThrows(DataAccessException.class, ()-> {
+            userService.logout("FakeAuthToken");
+        });
+    }
+
+    @Test
+    public void goodLogout() throws DataAccessException {
+        var dataAccess = new MemoryDataAccess();
+        var userService = new UserService(dataAccess);
+
+        var res = userService.register(new UserData("bob", "123", "bob@mail"));
+        userService.logout(res.authToken());
     }
 
 
