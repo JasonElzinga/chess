@@ -6,13 +6,10 @@ import dataaccess.MemoryDataAccess;
 import model.IndividualGameData;
 import model.ListGameResponse;
 import model.UserData;
-import org.eclipse.jetty.server.Authentication;
+
 import org.junit.jupiter.api.*;
-import passoff.model.TestAuthResult;
-import passoff.model.TestCreateResult;
 import service.UserService;
 
-import javax.xml.crypto.Data;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -65,9 +62,8 @@ public class ServiceTest {
         Assertions.assertNotNull(res.authToken());
 
 
-        Assertions.assertThrows(DataAccessException.class, ()-> {
-            userService.register(new UserData("cow", "rat", "john@1"));
-        });
+        Assertions.assertThrows(DataAccessException.class, ()->
+                userService.register(new UserData("cow", "rat", "john@1")));
     }
 
     @Test
@@ -84,23 +80,20 @@ public class ServiceTest {
     }
 
     @Test
-    public void badLoginSuccess() throws DataAccessException {
+    public void badLoginSuccess() {
         var dataAccess = new MemoryDataAccess();
         var userService = new UserService(dataAccess);
 
-        Assertions.assertThrows(DataAccessException.class, ()-> {
-            userService.login(new UserData("cow", "fakepassword", null));
-        });
+        Assertions.assertThrows(DataAccessException.class, ()->
+                userService.login(new UserData("cow", "fake password", null)));
     }
 
     @Test
-    public void badLogout() throws DataAccessException {
+    public void badLogout() {
         var dataAccess = new MemoryDataAccess();
         var userService = new UserService(dataAccess);
 
-        Assertions.assertThrows(DataAccessException.class, ()-> {
-            userService.logout("FakeAuthToken");
-        });
+        Assertions.assertThrows(DataAccessException.class, ()-> userService.logout("FakeAuthToken"));
     }
 
     @Test
@@ -121,8 +114,6 @@ public class ServiceTest {
         var res1 = userService.createGame("Epic Game", res.authToken());
 
 
-        //assertHttpOk(createResult);
-        Assertions.assertNotNull(res1.gameID());
         Assertions.assertEquals(1234, res1.gameID());
     }
 
@@ -133,13 +124,9 @@ public class ServiceTest {
 
         var res = userService.register(new UserData("jason", "123", "jason@mail"));
 
-        Assertions.assertThrows(DataAccessException.class, ()-> {
-            var res1 = userService.createGame("Epic Game", "FakeAuthToken");
-        });
+        Assertions.assertThrows(DataAccessException.class, ()-> userService.createGame("Epic Game", "FakeAuthToken"));
 
-        Assertions.assertThrows(DataAccessException.class, ()-> {
-            var res1 = userService.createGame(null, res.authToken());
-        });
+        Assertions.assertThrows(DataAccessException.class, ()-> userService.createGame(null, res.authToken()));
     }
 
     @Test
@@ -148,7 +135,7 @@ public class ServiceTest {
         var userService = new UserService(dataAccess);
 
         var res = userService.register(new UserData("bob", "123", "jason@mail"));
-        var res1 = userService.createGame("Epic Game", res.authToken());
+        userService.createGame("Epic Game", res.authToken());
         var res2 = userService.listGames(res.authToken());
 
         var expectedGame = new ListGameResponse(List.of(new IndividualGameData(1234, null, null, "Epic Game")));
@@ -162,12 +149,10 @@ public class ServiceTest {
         var userService = new UserService(dataAccess);
 
         var res = userService.register(new UserData("bob", "123", "jason@mail"));
-        var res1 = userService.createGame("Epic Game", res.authToken());
+        userService.createGame("Epic Game", res.authToken());
 
 
-        Assertions.assertThrows(DataAccessException.class, ()-> {
-            var res2 = userService.listGames(null);
-        });
+        Assertions.assertThrows(DataAccessException.class, ()-> userService.listGames(null));
 
     }
 
@@ -196,7 +181,7 @@ public class ServiceTest {
         var userService = new UserService(dataAccess);
 
         var res = userService.register(new UserData("bob", "123", "jason@mail"));
-        var res1 = userService.createGame("Epic Game", res.authToken());
+        userService.createGame("Epic Game", res.authToken());
 
 
         Assertions.assertThrows(DataAccessException.class, ()-> {
