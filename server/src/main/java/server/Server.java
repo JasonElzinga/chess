@@ -5,6 +5,7 @@ import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import model.CreateGameRequest;
+import model.JoinGameRequest;
 import model.UserData;
 import io.javalin.*;
 import io.javalin.http.Context;
@@ -30,8 +31,50 @@ public class Server {
         server.delete("session", this::logout);
         server.delete("db", this::clear);
         server.post("game", this::createGame);
+        server.get("game", this::listGames);
+        server.put("game", this::joinGame);
         // Register your endpoints and exception handlers here.
 
+    }
+
+    private void joinGame(@NotNull Context ctx) {
+        var serializer = new Gson();
+        var reqJson = ctx.body();
+        var req = serializer.fromJson(reqJson, JoinGameRequest.class);
+        var authToken = ctx.header("authorization");
+
+        try {
+            userService.joinGame(req.playerColor(), req.gameID(), authToken);
+            ctx.result("{}");
+            ctx.status(200);
+        } catch (DataAccessException e) {
+            var errorJson = serializer.toJson(Map.of("message", e.getMessage()));
+            ctx.result(errorJson);
+            if (e.getMessage().equals("Error: already taken")) {
+                ctx.status(403);
+            }
+            else if (e.getMessage().equals("Error: unauthorized")) {
+                ctx.status(401);
+            }
+            else {
+                ctx.status(400);
+            }
+        }
+
+    }
+
+    private void listGames(@NotNull Context ctx) {
+        var serializer = new Gson();
+
+        try {
+            var res = userService.listGames(ctx.header("authorization"));
+            ctx.result(serializer.toJson(res));
+            ctx.status(200);
+        } catch (DataAccessException e) {
+            var errorJson = serializer.toJson(Map.of("message", e.getMessage()));
+            ctx.result(errorJson);
+            ctx.status(401);
+        }
     }
 
     private void createGame(@NotNull Context ctx) {

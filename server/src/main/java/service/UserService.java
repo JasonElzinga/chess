@@ -1,9 +1,10 @@
 package service;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
-import dataaccess.MemoryDataAccess;
 import model.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class UserService {
@@ -83,5 +84,40 @@ public class UserService {
 
     public void clear() throws DataAccessException{
         dataAccess.clear();
+    }
+
+    public ListGameResponse listGames(String authToken) throws DataAccessException{
+        if (authToken == null) {
+            throw new DataAccessException("Error: unauthorized");
+        }
+        getAuthData(authToken);
+        var allGameData = dataAccess.listGames();
+        List<IndividualGameData> summaries = new ArrayList<>();
+
+        for (var g: allGameData) {
+            summaries.add(new IndividualGameData(g.gameID(), g.whiteUsername(), g.blackUsername(), g.gameName()));
+        }
+
+        return new ListGameResponse(summaries);
+    }
+
+    public void joinGame(String playerColor, Integer gameID, String authToken) throws DataAccessException{
+        if (authToken == null) {
+            throw new DataAccessException("Error: unauthorized");
+        }
+        if (playerColor == null || (!playerColor.equals("WHITE") && !playerColor.equals("BLACK")) || gameID == null) {
+            throw new DataAccessException("Error: Bad request");
+        }
+
+        var user = getAuthData(authToken);
+        var game = dataAccess.getGame(gameID);
+        if (game == null) {
+            throw new DataAccessException("Error: Bad request");
+        }
+        if ((playerColor.equals("WHITE") && game.whiteUsername() != null) ||
+                (playerColor.equals("BLACK") && game.blackUsername() != null)) {
+            throw new DataAccessException("Error: already taken");
+        }
+        dataAccess.joinGame(user.username(), playerColor, gameID);
     }
 }

@@ -1,8 +1,8 @@
 package dataaccess;
 
-import model.AuthData;
-import model.CreateGameResponse;
-import model.UserData;
+import model.*;
+
+import java.util.List;
 
 public interface DataAccess {
     void clear();
@@ -12,4 +12,7 @@ public interface DataAccess {
     AuthData getAuthData(String authToken);
     void deleteAuthData(AuthData auth);
     CreateGameResponse createGame(String gameName);
+    List<GameData> listGames();
+    void joinGame(String username, String playerColor, Integer gameID);
+    GameData getGame(int gameID);
 }

@@ -1,12 +1,11 @@
 package dataaccess;
 
 import chess.ChessGame;
-import model.AuthData;
-import model.CreateGameResponse;
-import model.GameData;
-import model.UserData;
+import model.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class MemoryDataAccess implements DataAccess{
     private HashMap<String, UserData> users = new HashMap<>();
@@ -29,6 +28,8 @@ public class MemoryDataAccess implements DataAccess{
     public void clear() {
         users.clear();
         nextGameID = 1234;
+        gameData.clear();
+        authData.clear();
     }
 
     @Override
@@ -51,6 +52,35 @@ public class MemoryDataAccess implements DataAccess{
         gameData.put(nextGameID, new GameData(nextGameID, null, null, gameName, new ChessGame()));
         nextGameID++;
         return new CreateGameResponse(nextGameID-1);
+    }
+
+    @Override
+    public List<GameData> listGames() {
+        return new ArrayList<>(gameData.values());
+    }
+
+    @Override
+    public GameData getGame(int gameID) {
+        return gameData.get(gameID);
+    }
+
+    @Override
+    public void joinGame(String username, String playerColor, Integer gameID) {
+        var currentGame = getGame(gameID);
+        var replacedGame = new GameData(0, null, null, null, null);
+
+        if (playerColor.equals("WHITE")) {
+            replacedGame =
+                    new GameData(gameID, username, currentGame.blackUsername(),
+                    currentGame.gameName(), currentGame.game());
+        }
+        else {
+            replacedGame =
+                    new GameData(gameID, currentGame.whiteUsername(), username,
+                            currentGame.gameName(), currentGame.game());
+        }
+
+        gameData.replace(gameID, replacedGame);
     }
 
 }
