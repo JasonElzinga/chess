@@ -12,7 +12,7 @@ public class MemoryDataAccess implements DataAccess{
     private HashMap<String, AuthData> authData = new HashMap<>();
     private HashMap<Integer, GameData> gameData = new HashMap<>();
 
-    private int nextGameID = 1234;
+    private Integer nextGameID = 1234;
 
     @Override
     public UserData getUser(String username) {
@@ -60,7 +60,7 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     @Override
-    public GameData getGame(int gameID) {
+    public GameData getGame(Integer gameID) {
         return gameData.get(gameID);
     }
 

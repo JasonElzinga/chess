@@ -14,5 +14,5 @@ public interface DataAccess {
     CreateGameResponse createGame(String gameName);
     List<GameData> listGames();
     void joinGame(String username, String playerColor, Integer gameID);
-    GameData getGame(int gameID);
+    GameData getGame(Integer gameID);
 }
