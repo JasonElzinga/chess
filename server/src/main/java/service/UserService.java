@@ -39,7 +39,7 @@ public class UserService {
         }
         var hashPwd = BCrypt.hashpw(user.password(), BCrypt.gensalt());
         var actualUser = dataAccess.getUser(user.username());
-        if (actualUser == null || (!actualUser.password().equals(hashPwd))) {
+        if (actualUser == null || BCrypt.checkpw(hashPwd, actualUser.password())) {
             throw new DataAccessException("Error: Unauthorized");
         }
 
