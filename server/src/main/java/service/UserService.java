@@ -2,6 +2,7 @@ package service;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,12 +22,14 @@ public class UserService {
         if (dataAccess.getUser(user.username()) != null) {
             throw new DataAccessException("Error: Username already taken");
         }
+        var hashPwd = BCrypt.hashpw(user.password(), BCrypt.gensalt());
 
         String authToken = generateToken();
         var auth = new AuthData(user.username(), authToken);
         dataAccess.storeAuth(auth);
+        var updatedUser = new UserData(user.username(), hashPwd, user.email());
+        dataAccess.createUser(updatedUser);
 
-        dataAccess.createUser(user);
         return new RegisterResponse(user.username(), authToken);
     }
 
@@ -34,9 +37,9 @@ public class UserService {
         if (user == null || user.username() == null || user.password() == null) {
             throw new DataAccessException("Error: Bad Request");
         }
-
+        var hashPwd = BCrypt.hashpw(user.password(), BCrypt.gensalt());
         var actualUser = dataAccess.getUser(user.username());
-        if (actualUser == null || (!actualUser.password().equals(user.password()))) {
+        if (actualUser == null || (!actualUser.password().equals(hashPwd))) {
             throw new DataAccessException("Error: Unauthorized");
         }
 
