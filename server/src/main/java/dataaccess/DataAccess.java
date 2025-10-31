@@ -5,7 +5,7 @@ import model.*;
 import java.util.List;
 
 public interface DataAccess {
-    void clear();
+    void clear() throws DataAccessException;
     UserData getUser(String username);
     void createUser(UserData user);
     void storeAuth(AuthData auth);

@@ -16,12 +16,21 @@ public class mySqlDataAccess implements DataAccess{
     }
 
     @Override
-    public void clear() {
-
+    public void clear() throws DataAccessException {
+        configureDatabase();
     }
 
     @Override
     public UserData getUser(String username) {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            for (String statement : createStatements) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            //throw new DataAccessException(String.format("Unable to configure database: %s", e.getMessage()));
+        }
         return null;
     }
 
@@ -85,11 +94,10 @@ public class mySqlDataAccess implements DataAccess{
             """,
             """
             CREATE TABLE IF NOT EXISTS userData (
-            id INT NOT NULL AUTO_INCREMENT,
             username VARCHAR(255) NOT NULL,
             password VARCHAR(500) NOT NULL,
             email VARCHAR(255) NOT NULL,
-            PRIMARY KEY (id)
+            PRIMARY KEY (username)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
     };
