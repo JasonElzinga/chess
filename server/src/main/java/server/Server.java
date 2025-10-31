@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
+import dataaccess.mySqlDataAccess;
 import model.CreateGameRequest;
 import model.JoinGameRequest;
 import model.UserData;
@@ -21,7 +22,12 @@ public class Server {
     private DataAccess dataAccess;
 
     public Server() {
-        this.dataAccess = new MemoryDataAccess();
+        //this.dataAccess = new MemoryDataAccess();
+        try {
+            this.dataAccess = new mySqlDataAccess();
+        } catch (DataAccessException e) {
+            //TODO when the database can't be created
+        }
         this.userService = new UserService(dataAccess);
 
         server = Javalin.create(config -> config.staticFiles.add("web"));

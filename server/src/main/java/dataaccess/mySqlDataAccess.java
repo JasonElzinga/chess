@@ -11,6 +11,9 @@ import java.util.List;
 
 public class mySqlDataAccess implements DataAccess{
 
+    public mySqlDataAccess() throws DataAccessException {
+        configureDatabase();
+    }
 
     @Override
     public void clear() {
@@ -86,7 +89,7 @@ public class mySqlDataAccess implements DataAccess{
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException(String.format("Unable to configure database: %s", e.getMessage()));
+            //throw new DataAccessException(String.format("Unable to configure database: %s", e.getMessage()));
         }
     }
 
