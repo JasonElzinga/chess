@@ -2,15 +2,16 @@ package dataaccess;
 
 import model.*;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public interface DataAccess {
-    void clear() throws DataAccessException;
-    UserData getUser(String username);
-    void createUser(UserData user);
-    void storeAuth(AuthData auth);
+    void clear() throws DataAccessException, SQLException;
+    UserData getUser(String username) throws DataAccessException;
+    void createUser(UserData user) throws DataAccessException;
+    void storeAuth(AuthData auth) throws DataAccessException;
     AuthData getAuthData(String authToken);
-    void deleteAuthData(AuthData auth);
+    void deleteAuthData(AuthData auth) throws DataAccessException;
     CreateGameResponse createGame(String gameName);
     List<GameData> listGames();
     void joinGame(String username, String playerColor, Integer gameID);

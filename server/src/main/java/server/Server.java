@@ -13,6 +13,7 @@ import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
 import service.UserService;
 
+import java.sql.SQLException;
 import java.util.Map;
 
 public class Server {
@@ -22,12 +23,15 @@ public class Server {
     private DataAccess dataAccess;
 
     public Server() {
-        //this.dataAccess = new MemoryDataAccess();
+        this.dataAccess = new MemoryDataAccess();
         try {
             this.dataAccess = new mySqlDataAccess();
+        } catch (SQLException e) {
+            // TODO report the 500 error
         } catch (DataAccessException e) {
-            //TODO when the database can't be created
+            throw new RuntimeException(e);
         }
+        //this.dataAccess = new MemoryDataAccess();
         this.userService = new UserService(dataAccess);
 
         server = Javalin.create(config -> config.staticFiles.add("web"));
@@ -110,7 +114,7 @@ public class Server {
             userService.clear();
             ctx.result("{}");
             ctx.status(200);
-        } catch (DataAccessException e) {
+        } catch (DataAccessException | SQLException e) {
             ctx.status(500);
         }
     }

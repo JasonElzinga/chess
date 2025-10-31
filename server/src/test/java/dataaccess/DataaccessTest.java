@@ -12,10 +12,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class Dataaccess {
+public class DataaccessTest {
 
     @Test
-    void clear() {
+    void clear() throws DataAccessException{
         var user = new UserData("joe", "j@j", "j");
         DataAccess da = new MemoryDataAccess();
         da.createUser(user);

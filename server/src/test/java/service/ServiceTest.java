@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class ServiceTest {
 
     @Test
-    void clear() {
+    void clear() throws DataAccessException {
         var user = new UserData("joe", "j@j", "j");
         DataAccess da = new MemoryDataAccess();
         da.createUser(user);

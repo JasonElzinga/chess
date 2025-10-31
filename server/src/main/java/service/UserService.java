@@ -4,6 +4,7 @@ import dataaccess.DataAccessException;
 import model.*;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -37,9 +38,14 @@ public class UserService {
         if (user == null || user.username() == null || user.password() == null) {
             throw new DataAccessException("Error: Bad Request");
         }
-        var hashPwd = BCrypt.hashpw(user.password(), BCrypt.gensalt());
+//        var hashPwd = BCrypt.hashpw(user.password(), BCrypt.gensalt());
         var actualUser = dataAccess.getUser(user.username());
-        if (actualUser == null || BCrypt.checkpw(hashPwd, actualUser.password())) {
+        if (actualUser == null) {
+            throw new DataAccessException("Error: Unauthorized");
+        }
+
+        boolean passwordMatches = BCrypt.checkpw(user.password(), actualUser.password());
+        if (!passwordMatches) {
             throw new DataAccessException("Error: Unauthorized");
         }
 
@@ -82,7 +88,7 @@ public class UserService {
         return authData;
     }
 
-    public void clear() throws DataAccessException{
+    public void clear() throws DataAccessException, SQLException {
         dataAccess.clear();
     }
 
