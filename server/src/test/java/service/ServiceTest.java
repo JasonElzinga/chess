@@ -9,6 +9,7 @@ import model.UserData;
 
 import org.junit.jupiter.api.*;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -17,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class ServiceTest {
 
     @Test
-    void clear() throws DataAccessException {
+    void clear() throws DataAccessException, SQLException {
         var user = new UserData("joe", "j@j", "j");
         DataAccess da = new MemoryDataAccess();
         da.createUser(user);

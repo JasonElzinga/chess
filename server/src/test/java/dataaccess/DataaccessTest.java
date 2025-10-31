@@ -4,9 +4,11 @@ import model.IndividualGameData;
 import model.ListGameResponse;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import service.UserService;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -14,10 +16,16 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class DataaccessTest {
 
+    @BeforeEach
+    void beforeAllTests() throws DataAccessException, SQLException {
+        DataAccess da = new mySqlDataAccess();
+        da.clear();
+    }
+
     @Test
-    void clear() throws DataAccessException{
+    void clear() throws DataAccessException, SQLException {
         var user = new UserData("joe", "j@j", "j");
-        DataAccess da = new MemoryDataAccess();
+        DataAccess da = new mySqlDataAccess();
         da.createUser(user);
         assertNotNull(da.getUser(user.username()));
         da.clear();
@@ -26,8 +34,8 @@ public class DataaccessTest {
 
 
     @Test
-    public void registerNormal() throws DataAccessException {
-        var dataAccess = new MemoryDataAccess();
+    public void registerNormal() throws DataAccessException, SQLException {
+        var dataAccess = new mySqlDataAccess();
         var userService = new UserService(dataAccess);
 
         var res = userService.register(new UserData("cow", "rat", "john@1"));
@@ -37,8 +45,8 @@ public class DataaccessTest {
     }
 
     @Test
-    public void registerNotNull() throws DataAccessException {
-        var dataAccess = new MemoryDataAccess();
+    public void registerNotNull() throws DataAccessException, SQLException {
+        var dataAccess = new mySqlDataAccess();
         var userService = new UserService(dataAccess);
 
         var res = userService.register(new UserData("cow", "rat", "john@1"));
@@ -49,8 +57,8 @@ public class DataaccessTest {
     }
 
     @Test
-    public void registerSameUsername() throws DataAccessException {
-        var dataAccess = new MemoryDataAccess();
+    public void registerSameUsername() throws DataAccessException, SQLException {
+        var dataAccess = new mySqlDataAccess();
         var userService = new UserService(dataAccess);
 
 
@@ -64,8 +72,8 @@ public class DataaccessTest {
     }
 
     @Test
-    public void loginSuccess() throws DataAccessException {
-        var dataAccess = new MemoryDataAccess();
+    public void loginSuccess() throws DataAccessException, SQLException {
+        var dataAccess = new mySqlDataAccess();
         var userService = new UserService(dataAccess);
 
         userService.register((new UserData("cow1", "rat1", "cow1@bob")));
@@ -77,8 +85,8 @@ public class DataaccessTest {
     }
 
     @Test
-    public void badLoginSuccess() {
-        var dataAccess = new MemoryDataAccess();
+    public void badLoginSuccess() throws SQLException, DataAccessException {
+        var dataAccess = new mySqlDataAccess();
         var userService = new UserService(dataAccess);
 
         Assertions.assertThrows(DataAccessException.class, ()->
@@ -86,16 +94,16 @@ public class DataaccessTest {
     }
 
     @Test
-    public void badLogout() {
-        var dataAccess = new MemoryDataAccess();
+    public void badLogout() throws SQLException, DataAccessException {
+        var dataAccess = new mySqlDataAccess();
         var userService = new UserService(dataAccess);
 
         Assertions.assertThrows(DataAccessException.class, ()-> userService.logout("FakeAuthToken"));
     }
 
     @Test
-    public void goodLogout() throws DataAccessException {
-        var dataAccess = new MemoryDataAccess();
+    public void goodLogout() throws DataAccessException, SQLException {
+        var dataAccess = new mySqlDataAccess();
         var userService = new UserService(dataAccess);
 
         var res = userService.register(new UserData("bob", "123", "bob@mail"));
@@ -103,20 +111,20 @@ public class DataaccessTest {
     }
 
     @Test
-    public void createGameSuccess() throws DataAccessException {
-        var dataAccess = new MemoryDataAccess();
+    public void createGameSuccess() throws DataAccessException, SQLException {
+        var dataAccess = new mySqlDataAccess();
         var userService = new UserService(dataAccess);
 
         var res = userService.register(new UserData("jason", "123", "jason@mail"));
         var res1 = userService.createGame("Epic Game", res.authToken());
 
 
-        Assertions.assertEquals(1234, res1.gameID());
+        Assertions.assertEquals(1, res1.gameID());
     }
 
     @Test
-    public void createGameFail() throws DataAccessException {
-        var dataAccess = new MemoryDataAccess();
+    public void createGameFail() throws DataAccessException, SQLException {
+        var dataAccess = new mySqlDataAccess();
         var userService = new UserService(dataAccess);
 
         var res = userService.register(new UserData("jason", "123", "jason@mail"));
@@ -127,8 +135,8 @@ public class DataaccessTest {
     }
 
     @Test
-    public void listGameSuccess() throws DataAccessException {
-        var dataAccess = new MemoryDataAccess();
+    public void listGameSuccess() throws DataAccessException, SQLException {
+        var dataAccess = new mySqlDataAccess();
         var userService = new UserService(dataAccess);
 
         var res = userService.register(new UserData("bob", "123", "jason@mail"));
@@ -141,8 +149,8 @@ public class DataaccessTest {
     }
 
     @Test
-    public void listGameFail() throws DataAccessException {
-        var dataAccess = new MemoryDataAccess();
+    public void listGameFail() throws DataAccessException, SQLException {
+        var dataAccess = new mySqlDataAccess();
         var userService = new UserService(dataAccess);
 
         var res = userService.register(new UserData("bob", "123", "jason@mail"));
@@ -154,8 +162,8 @@ public class DataaccessTest {
     }
 
     @Test
-    public void joinGameSuccess() throws DataAccessException {
-        var dataAccess = new MemoryDataAccess();
+    public void joinGameSuccess() throws DataAccessException, SQLException {
+        var dataAccess = new mySqlDataAccess();
         var userService = new UserService(dataAccess);
 
         var res = userService.register(new UserData("bob", "123", "jason@mail"));
@@ -173,8 +181,8 @@ public class DataaccessTest {
     }
 
     @Test
-    public void joinGameFail() throws DataAccessException {
-        var dataAccess = new MemoryDataAccess();
+    public void joinGameFail() throws DataAccessException, SQLException {
+        var dataAccess = new mySqlDataAccess();
         var userService = new UserService(dataAccess);
 
         var res = userService.register(new UserData("bob", "123", "jason@mail"));
