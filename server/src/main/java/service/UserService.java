@@ -17,24 +17,31 @@ public class UserService {
 
 
     public RegisterResponse register(UserData user) throws DataAccessException {
-        if (user == null || user.username() == null || user.email() == null || user.password() == null) {
-            throw new DataAccessException("Error: Bad Request");
-        }
-        if (dataAccess.getUser(user.username()) != null) {
-            throw new DataAccessException("Error: Username already taken");
-        }
-        var hashPwd = BCrypt.hashpw(user.password(), BCrypt.gensalt());
+        try {
+            if (user == null || user.username() == null || user.email() == null || user.password() == null) {
+                throw new DataAccessException("Error: Bad Request");
+            }
+            if (dataAccess.getUser(user.username()) != null) {
+                throw new DataAccessException("Error: Username already taken");
+            }
+            var hashPwd = BCrypt.hashpw(user.password(), BCrypt.gensalt());
 
-        String authToken = generateToken();
-        var auth = new AuthData(user.username(), authToken);
-        dataAccess.storeAuth(auth);
-        var updatedUser = new UserData(user.username(), hashPwd, user.email());
-        dataAccess.createUser(updatedUser);
+            String authToken = generateToken();
+            var auth = new AuthData(user.username(), authToken);
+            dataAccess.storeAuth(auth);
+            var updatedUser = new UserData(user.username(), hashPwd, user.email());
+            dataAccess.createUser(updatedUser);
 
-        return new RegisterResponse(user.username(), authToken);
+            return new RegisterResponse(user.username(), authToken);
+        } catch (DataAccessException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new DataAccessException("Error: database failure");
+        }
     }
 
     public LoginResponse login(UserData user) throws DataAccessException {
+        try {
         if (user == null || user.username() == null || user.password() == null) {
             throw new DataAccessException("Error: Bad Request");
         }
@@ -54,6 +61,11 @@ public class UserService {
         dataAccess.storeAuth(auth);
 
         return new LoginResponse(actualUser.username(), authToken);
+        } catch (DataAccessException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new DataAccessException("Error: database failure");
+        }
     }
 
     public static String generateToken() {
@@ -62,70 +74,103 @@ public class UserService {
 
 
     public void logout(String authToken) throws DataAccessException {
-        var authData = getAuthData(authToken);
-        dataAccess.deleteAuthData(authData);
+        try {
+            var authData = getAuthData(authToken);
+            dataAccess.deleteAuthData(authData);
+        } catch (DataAccessException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new DataAccessException("Error: database failure");
+        }
     }
 
     public CreateGameResponse createGame(String gameName, String authToken) throws DataAccessException{
-        if (gameName == null) {
-            throw new DataAccessException("Error: Bad Request");
-        }
-        var authData = getAuthData(authToken);
+        try {
+            if (gameName == null) {
+                throw new DataAccessException("Error: Bad Request");
+            }
+            var authData = getAuthData(authToken);
 
-        var createGameResponse = dataAccess.createGame(gameName);
-        return createGameResponse;
+            var createGameResponse = dataAccess.createGame(gameName);
+            return createGameResponse;
+        } catch (DataAccessException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new DataAccessException("Error: database failure");
+        }
     }
 
     private AuthData getAuthData(String authToken) throws DataAccessException{
-        if (authToken == null) {
-            throw new DataAccessException("Error: Bad Request");
-        }
+        try {
+            if (authToken == null) {
+                throw new DataAccessException("Error: Bad Request");
+            }
 
-        var authData = dataAccess.getAuthData(authToken);
-        if (authData == null) {
-            throw new DataAccessException("Error: unauthorized");
+            var authData = dataAccess.getAuthData(authToken);
+            if (authData == null) {
+                throw new DataAccessException("Error: unauthorized");
+            }
+            return authData;
+        } catch (DataAccessException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new DataAccessException("Error: database failure");
         }
-        return authData;
     }
 
     public void clear() throws DataAccessException, SQLException {
-        dataAccess.clear();
+        try {
+            dataAccess.clear();
+        } catch (DataAccessException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new DataAccessException("Error: database failure");
+        }
     }
 
     public ListGameResponse listGames(String authToken) throws DataAccessException{
-        if (authToken == null) {
-            throw new DataAccessException("Error: unauthorized");
-        }
-        getAuthData(authToken);
-        var allGameData = dataAccess.listGames();
-        List<IndividualGameData> summaries = new ArrayList<>();
+        try {
+            if (authToken == null) {
+                throw new DataAccessException("Error: unauthorized");
+            }
+            getAuthData(authToken);
+            var allGameData = dataAccess.listGames();
+            List<IndividualGameData> summaries = new ArrayList<>();
 
-        for (var g: allGameData) {
-            summaries.add(new IndividualGameData(g.gameID(), g.whiteUsername(), g.blackUsername(), g.gameName()));
-        }
+            for (var g : allGameData) {
+                summaries.add(new IndividualGameData(g.gameID(), g.whiteUsername(), g.blackUsername(), g.gameName()));
+            }
 
-        return new ListGameResponse(summaries);
+            return new ListGameResponse(summaries);
+        } catch (DataAccessException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new DataAccessException("Error: database failure");
+        }
     }
 
-    public void joinGame(String playerColor, Integer gameID, String authToken) throws DataAccessException{
-        if (authToken == null) {
-            throw new DataAccessException("Error: unauthorized");
-        }
-        if (playerColor == null || (!playerColor.equals("WHITE") && !playerColor.equals("BLACK")) || gameID == null) {
-            throw new DataAccessException("Error: Bad request");
-        }
-
+    public void joinGame(String playerColor, Integer gameID, String authToken) throws DataAccessException {
         try {
+            if (authToken == null) {
+                throw new DataAccessException("Error: unauthorized");
+            }
+            if (playerColor == null || (!playerColor.equals("WHITE") && !playerColor.equals("BLACK")) || gameID == null) {
+                throw new DataAccessException("Error: Bad Request");
+            }
+
             var user = getAuthData(authToken);
             var game = dataAccess.getGame(gameID);
             if (game == null) {
-                throw new DataAccessException("Error: Bad request");
+                throw new DataAccessException("Error: Bad Request");
             }
             if ((playerColor.equals("WHITE") && game.whiteUsername() != null) ||
                     (playerColor.equals("BLACK") && game.blackUsername() != null)) {
                 throw new DataAccessException("Error: already taken");
             }
+
             dataAccess.joinGame(user.username(), playerColor, gameID);
+        } catch (DataAccessException e) {
+            throw e;
         } catch (Exception e) {
             throw new DataAccessException("Error: database failure");
         }

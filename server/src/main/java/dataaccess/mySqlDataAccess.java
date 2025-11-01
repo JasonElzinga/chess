@@ -30,6 +30,8 @@ public class mySqlDataAccess implements DataAccess{
             try (var ps = conn.prepareStatement("DROP TABLE IF EXISTS authdata, gamedata, userdata")) {
                 ps.executeUpdate();
             }
+        } catch (Exception e) {
+            throw new SQLException("Failed to get database connection");
         }
         configureDatabase();
     }

@@ -23,13 +23,11 @@ public class Server {
     private DataAccess dataAccess;
 
     public Server() {
-        this.dataAccess = new MemoryDataAccess();
+        //this.dataAccess = new MemoryDataAccess();
         try {
             this.dataAccess = new mySqlDataAccess();
-        } catch (SQLException e) {
-            // TODO no idea
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException | DataAccessException e) {
+            System.err.println("Failed to start the mysql database");
         }
         //this.dataAccess = new MemoryDataAccess();
         this.userService = new UserService(dataAccess);
