@@ -143,7 +143,7 @@ public class DataaccessTest {
         userService.createGame("Epic Game", res.authToken());
         var res2 = userService.listGames(res.authToken());
 
-        var expectedGame = new ListGameResponse(List.of(new IndividualGameData(1234, null, null, "Epic Game")));
+        var expectedGame = new ListGameResponse(List.of(new IndividualGameData(1, null, null, "Epic Game")));
         Assertions.assertNotNull(res2);
         Assertions.assertEquals(expectedGame, res2);
     }
@@ -169,12 +169,12 @@ public class DataaccessTest {
         var res = userService.register(new UserData("bob", "123", "jason@mail"));
         var res1 = userService.register(new UserData("bob2", "123", "bob2@mail"));
         userService.createGame("Epic Game", res.authToken());
-        userService.joinGame("WHITE", 1234, res.authToken());
-        userService.joinGame("BLACK",1234, res1.authToken());
+        userService.joinGame("WHITE", 1, res.authToken());
+        userService.joinGame("BLACK",1, res1.authToken());
 
         var res2 = userService.listGames(res.authToken());
         var expectedGame = new ListGameResponse(List.of
-                (new IndividualGameData(1234, "bob", "bob2", "Epic Game")));
+                (new IndividualGameData(1, "bob", "bob2", "Epic Game")));
 
         Assertions.assertNotNull(res2);
         Assertions.assertEquals(expectedGame, res2);
@@ -190,9 +190,9 @@ public class DataaccessTest {
 
 
         Assertions.assertThrows(DataAccessException.class, ()-> {
-            userService.joinGame(null, 1234, res.authToken());
-            userService.joinGame("WHITE", 1234, res.authToken());
-            userService.joinGame("WHITE", 1234, "Fake authToken");
+            userService.joinGame(null, 1, res.authToken());
+            userService.joinGame("WHITE", 1, res.authToken());
+            userService.joinGame("WHITE", 1, "Fake authToken");
         });
     }
 

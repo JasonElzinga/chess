@@ -10,10 +10,10 @@ public interface DataAccess {
     UserData getUser(String username) throws DataAccessException;
     void createUser(UserData user) throws DataAccessException;
     void storeAuth(AuthData auth) throws DataAccessException;
-    AuthData getAuthData(String authToken);
+    AuthData getAuthData(String authToken) throws DataAccessException;
     void deleteAuthData(AuthData auth) throws DataAccessException;
     CreateGameResponse createGame(String gameName) throws DataAccessException;
-    List<GameData> listGames();
-    void joinGame(String username, String playerColor, Integer gameID);
-    GameData getGame(Integer gameID);
+    List<GameData> listGames() throws DataAccessException;
+    void joinGame(String username, String playerColor, Integer gameID) throws DataAccessException;
+    GameData getGame(Integer gameID) throws DataAccessException;
 }

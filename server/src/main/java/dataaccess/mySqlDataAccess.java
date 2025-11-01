@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
@@ -44,13 +45,13 @@ public class mySqlDataAccess implements DataAccess{
                         return readUserData(rs);
                     }
                 } catch (SQLException e) {
-                    throw new DataAccessException(e.getMessage());
+                    throw new DataAccessException("Error: database failure");
                 }
             } catch (SQLException e) {
-                throw new DataAccessException(e.getMessage());
+                throw new DataAccessException("Error: database failure");
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        }catch (SQLException e) {
+            throw new DataAccessException("Error: database failure");
         }
         return null;
     }
@@ -79,7 +80,7 @@ public class mySqlDataAccess implements DataAccess{
     }
 
     @Override
-    public AuthData getAuthData(String authToken) {
+    public AuthData getAuthData(String authToken) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM authdata WHERE authtoken=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -89,13 +90,13 @@ public class mySqlDataAccess implements DataAccess{
                         return readAuthData(rs);
                     }
                 } catch (SQLException e) {
-                    throw new DataAccessException(e.getMessage());
+                    throw new DataAccessException("Error: database failure");
                 }
             } catch (SQLException e) {
-                throw new DataAccessException(e.getMessage());
+                throw new DataAccessException("Error: database failure");
             }
         } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException("Error: database failure");
         }
         return null;
     }
@@ -105,7 +106,7 @@ public class mySqlDataAccess implements DataAccess{
         var authtoken = rs.getString("authtoken");
         var username = rs.getString("username");
 
-        AuthData auth = new AuthData(authtoken, username);
+        AuthData auth = new AuthData(username, authtoken);
         return auth;
     }
 
@@ -120,24 +121,80 @@ public class mySqlDataAccess implements DataAccess{
         var newGame = new ChessGame();
         var serializer = new Gson();
         var jsonGame = serializer.toJson(newGame);
-        var statement = "INSERT INTO gamedata (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)";
+        var statement = "INSERT INTO gamedata (whiteusername, blackusername, gamename, game) VALUES (?, ?, ?, ?)";
         var generatedID = executeUpdate(statement, null, null, gameName, jsonGame);
         return new CreateGameResponse(generatedID);
     }
 
     @Override
-    public List<GameData> listGames() {
-        return List.of();
+    public List<GameData> listGames() throws DataAccessException {
+        List<GameData> games = new ArrayList<>();
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT * FROM gamedata";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    while(rs.next()) {
+                        games.add(readGameData(rs));
+                    }
+                } catch (SQLException e) {
+                    throw new DataAccessException("Error: database failure");
+                }
+            } catch (SQLException e) {
+                throw new DataAccessException("Error: database failure");
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new DataAccessException("Error: database failure");
+        }
+        return games;
+    }
+
+
+
+    @Override
+    public void joinGame(String username, String playerColor, Integer gameID) throws DataAccessException {
+        String statement = "";
+        if (playerColor.equals("WHITE")) {
+            statement = "UPDATE gamedata SET whiteusername= ? WHERE gameID=?";
+        } else {
+            statement = "UPDATE gamedata SET blackusername= ? WHERE gameID=?";
+        }
+        executeUpdate(statement, username, gameID);
     }
 
     @Override
-    public void joinGame(String username, String playerColor, Integer gameID) {
-
-    }
-
-    @Override
-    public GameData getGame(Integer gameID) {
+    public GameData getGame(Integer gameID) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT * FROM gamedata WHERE gameID=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return readGameData(rs);
+                    }
+                } catch (SQLException e) {
+                    throw new DataAccessException(e.getMessage());
+                }
+            } catch (SQLException e) {
+                throw new DataAccessException(e.getMessage());
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new DataAccessException("Error: database failure");
+        }
         return null;
+    }
+
+    private GameData readGameData(ResultSet rs) throws SQLException {
+        var serializer = new Gson();
+        var gameID = rs.getInt("gameID");
+        var whiteUsername = rs.getString("whiteusername");
+        var blackUsername = rs.getString("blackusername");
+        var gameName = rs.getString("gamename");
+        var jsonGame = rs.getString("game");
+
+        var game = serializer.fromJson(jsonGame, ChessGame.class);
+
+        GameData gameData = new GameData(gameID, whiteUsername, blackUsername, gameName, game);
+        return gameData;
     }
 
 
@@ -161,9 +218,7 @@ public class mySqlDataAccess implements DataAccess{
                 return 0;
             }
         } catch (SQLException e) {
-            throw new DataAccessException(String.format("unable to update database: %s, %s", statement, e.getMessage()));
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException("Error: database failure");
         }
     }
 
@@ -205,7 +260,7 @@ public class mySqlDataAccess implements DataAccess{
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException(String.format("Unable to configure database: %s", e.getMessage()));
+            throw new DataAccessException("Error: database failure");
         }
     }
 }

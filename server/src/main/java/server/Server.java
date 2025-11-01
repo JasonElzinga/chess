@@ -27,7 +27,7 @@ public class Server {
         try {
             this.dataAccess = new mySqlDataAccess();
         } catch (SQLException e) {
-            // TODO report the 500 error
+            // TODO no idea
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
@@ -66,11 +66,13 @@ public class Server {
             else if (e.getMessage().equals("Error: unauthorized")) {
                 ctx.status(401);
             }
+            else if (e.getMessage().equals("Error: database failure")) {
+                ctx.status(500);
+            }
             else {
                 ctx.status(400);
             }
         }
-
     }
 
     private void listGames(@NotNull Context ctx) {
@@ -83,7 +85,12 @@ public class Server {
         } catch (DataAccessException e) {
             var errorJson = serializer.toJson(Map.of("message", e.getMessage()));
             ctx.result(errorJson);
-            ctx.status(401);
+            if (e.getMessage().equals("Error: database failure")) {
+                ctx.status(500);
+            }
+            else {
+                ctx.status(401);
+            }
         }
     }
 
@@ -103,7 +110,11 @@ public class Server {
             //System.out.println(e.getMessage());
             if (e.getMessage().equals("Error: Bad Request")) {
                 ctx.status(400);
-            } else {
+            }
+            else if (e.getMessage().equals("Error: database failure")) {
+                ctx.status(500);
+            }
+            else {
                 ctx.status(401);
             }
         }
@@ -134,7 +145,11 @@ public class Server {
             //System.out.println(e.getMessage());
             if (e.getMessage().equals("Error: Bad Request")) {
                 ctx.status(400);
-            } else {
+            }
+            else if (e.getMessage().equals("Error: database failure")) {
+                ctx.status(500);
+            }
+            else {
                 ctx.status(403);
             }
         }
@@ -155,9 +170,17 @@ public class Server {
             //System.out.println(e.getMessage());
             if (e.getMessage().equals("Error: Unauthorized")) {
                 ctx.status(401);
-            } else {
+            }
+            else if (e.getMessage().equals("Error: database failure")) {
+                ctx.status(500);
+            }
+            else {
                 ctx.status(400);
             }
+        } catch (Exception e) {
+            var errorJson = serializer.toJson(Map.of("message", e.getMessage()));
+            ctx.result(errorJson);
+            ctx.status(500);
         }
     }
 
@@ -178,7 +201,13 @@ public class Server {
             var errorJson = serializer.toJson(Map.of("message", e.getMessage()));
             ctx.result(errorJson);
             //System.out.println(e.getMessage());
-            ctx.status(401);
+
+            if (e.getMessage().equals("Error: database failure")) {
+                ctx.status(500);
+            }
+            else {
+                ctx.status(401);
+            }
         }
     }
 

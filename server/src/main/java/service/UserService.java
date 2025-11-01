@@ -115,15 +115,19 @@ public class UserService {
             throw new DataAccessException("Error: Bad request");
         }
 
-        var user = getAuthData(authToken);
-        var game = dataAccess.getGame(gameID);
-        if (game == null) {
-            throw new DataAccessException("Error: Bad request");
+        try {
+            var user = getAuthData(authToken);
+            var game = dataAccess.getGame(gameID);
+            if (game == null) {
+                throw new DataAccessException("Error: Bad request");
+            }
+            if ((playerColor.equals("WHITE") && game.whiteUsername() != null) ||
+                    (playerColor.equals("BLACK") && game.blackUsername() != null)) {
+                throw new DataAccessException("Error: already taken");
+            }
+            dataAccess.joinGame(user.username(), playerColor, gameID);
+        } catch (Exception e) {
+            throw new DataAccessException("Error: database failure");
         }
-        if ((playerColor.equals("WHITE") && game.whiteUsername() != null) ||
-                (playerColor.equals("BLACK") && game.blackUsername() != null)) {
-            throw new DataAccessException("Error: already taken");
-        }
-        dataAccess.joinGame(user.username(), playerColor, gameID);
     }
 }
