@@ -17,10 +17,10 @@ import java.util.List;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 
-public class mySqlDataAccess implements DataAccess{
+public class mySQLDataAccess implements DataAccess{
 
 
-    public mySqlDataAccess() throws DataAccessException, SQLException {
+    public mySQLDataAccess() throws DataAccessException, SQLException {
         configureDatabase();
     }
 
@@ -205,10 +205,16 @@ public class mySqlDataAccess implements DataAccess{
             try (PreparedStatement ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
                 for (int i = 0; i < params.length; i++) {
                     Object param = params[i];
-                    if (param instanceof String p) ps.setString(i + 1, p);
-                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
+                    if (param instanceof String p) {
+                        ps.setString(i + 1, p);
+                    }
+                    else if (param instanceof Integer p) {
+                        ps.setInt(i + 1, p);
+                    }
                     //else if (param instanceof ChessGame p) ps.setString(i + 1, serializer.toJson(p));
-                    else if (param == null) ps.setNull(i + 1, NULL);
+                    else if (param == null) {
+                        ps.setNull(i + 1, NULL);
+                    }
                 }
                 ps.executeUpdate();
 

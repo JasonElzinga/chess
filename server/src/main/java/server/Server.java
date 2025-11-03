@@ -3,8 +3,7 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
-import dataaccess.MemoryDataAccess;
-import dataaccess.mySqlDataAccess;
+import dataaccess.mySQLDataAccess;
 import model.CreateGameRequest;
 import model.JoinGameRequest;
 import model.UserData;
@@ -25,7 +24,7 @@ public class Server {
     public Server() {
         //this.dataAccess = new MemoryDataAccess();
         try {
-            this.dataAccess = new mySqlDataAccess();
+            this.dataAccess = new mySQLDataAccess();
         } catch (SQLException | DataAccessException e) {
             System.err.println("Failed to start the mysql database");
         }
