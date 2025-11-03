@@ -64,11 +64,11 @@ public class Server {
             else if (e.getMessage().equals("Error: unauthorized")) {
                 ctx.status(401);
             }
-            else if (e.getMessage().equals("Error: database failure")) {
-                ctx.status(500);
+            else if (e.getMessage().equals("Error: bad request")){
+                ctx.status(400);
             }
             else {
-                ctx.status(400);
+                ctx.status(500);
             }
         }
     }
@@ -83,11 +83,11 @@ public class Server {
         } catch (DataAccessException e) {
             var errorJson = serializer.toJson(Map.of("message", e.getMessage()));
             ctx.result(errorJson);
-            if (e.getMessage().equals("Error: database failure")) {
-                ctx.status(500);
-            }
-            else {
+            if (e.getMessage().equals("Error: unauthorized")){
                 ctx.status(401);
+            }
+            else  {
+                ctx.status(500);
             }
         }
     }
@@ -106,24 +106,27 @@ public class Server {
             var errorJson = serializer.toJson(Map.of("message", e.getMessage()));
             ctx.result(errorJson);
             //System.out.println(e.getMessage());
-            if (e.getMessage().equals("Error: Bad Request")) {
+            if (e.getMessage().equals("Error: bad request")) {
                 ctx.status(400);
             }
-            else if (e.getMessage().equals("Error: database failure")) {
-                ctx.status(500);
+            else if (e.getMessage().equals("Error: unauthorized")){
+                ctx.status(401);
             }
             else {
-                ctx.status(401);
+                ctx.status(500);
             }
         }
     }
 
     private void clear(@NotNull Context ctx) {
+        var serializer = new Gson();
         try {
             userService.clear();
             ctx.result("{}");
             ctx.status(200);
         } catch (DataAccessException | SQLException e) {
+            var errorJson = serializer.toJson(Map.of("message", e.getMessage()));
+            ctx.result(errorJson);
             ctx.status(500);
         }
     }
@@ -141,14 +144,14 @@ public class Server {
             var errorJson = serializer.toJson(Map.of("message", e.getMessage()));
             ctx.result(errorJson);
             //System.out.println(e.getMessage());
-            if (e.getMessage().equals("Error: Bad Request")) {
+            if (e.getMessage().equals("Error: bad request")) {
                 ctx.status(400);
             }
-            else if (e.getMessage().equals("Error: database failure")) {
-                ctx.status(500);
+            else if (e.getMessage().equals("Error: already taken")) {
+                ctx.status(403);
             }
             else {
-                ctx.status(403);
+                ctx.status(500);
             }
         }
     }
@@ -166,17 +169,17 @@ public class Server {
             var errorJson = serializer.toJson(Map.of("message", e.getMessage()));
             ctx.result(errorJson);
             //System.out.println(e.getMessage());
-            if (e.getMessage().equals("Error: Unauthorized")) {
+            if (e.getMessage().equals("Error: unauthorized")) {
                 ctx.status(401);
             }
-            else if (e.getMessage().equals("Error: database failure")) {
+            else if (e.getMessage().equals("Error: database failure") || e.getMessage().equals("Error: failed to get connection")) {
                 ctx.status(500);
             }
             else {
                 ctx.status(400);
             }
         } catch (Exception e) {
-            var errorJson = serializer.toJson(Map.of("message", e.getMessage()));
+            var errorJson = serializer.toJson(Map.of("message", "Error: database error"));
             ctx.result(errorJson);
             ctx.status(500);
         }

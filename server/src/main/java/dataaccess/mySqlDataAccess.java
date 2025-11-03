@@ -227,17 +227,17 @@ public class mySqlDataAccess implements DataAccess{
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS authdata (
-            authToken VARCHAR(255) NOT NULL,
+            authtoken VARCHAR(255) NOT NULL,
             username VARCHAR(255) NOT NULL,
-            PRIMARY KEY (authToken)
+            PRIMARY KEY (authtoken)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """,
             """
             CREATE TABLE IF NOT EXISTS gamedata (
             gameID INT NOT NULL AUTO_INCREMENT,
-            whiteUsername VARCHAR(255),
-            blackUsername VARCHAR(255),
-            gameName VARCHAR(255),
+            whiteusername VARCHAR(255),
+            blackusername VARCHAR(255),
+            gamename VARCHAR(255),
             game JSON,
             PRIMARY KEY (gameID)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci

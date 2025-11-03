@@ -19,10 +19,10 @@ public class UserService {
     public RegisterResponse register(UserData user) throws DataAccessException {
         try {
             if (user == null || user.username() == null || user.email() == null || user.password() == null) {
-                throw new DataAccessException("Error: Bad Request");
+                throw new DataAccessException("Error: bad request");
             }
             if (dataAccess.getUser(user.username()) != null) {
-                throw new DataAccessException("Error: Username already taken");
+                throw new DataAccessException("Error: already taken");
             }
             var hashPwd = BCrypt.hashpw(user.password(), BCrypt.gensalt());
 
@@ -43,17 +43,17 @@ public class UserService {
     public LoginResponse login(UserData user) throws DataAccessException {
         try {
         if (user == null || user.username() == null || user.password() == null) {
-            throw new DataAccessException("Error: Bad Request");
+            throw new DataAccessException("Error: bad request");
         }
 //        var hashPwd = BCrypt.hashpw(user.password(), BCrypt.gensalt());
         var actualUser = dataAccess.getUser(user.username());
         if (actualUser == null) {
-            throw new DataAccessException("Error: Unauthorized");
+            throw new DataAccessException("Error: unauthorized");
         }
 
         boolean passwordMatches = BCrypt.checkpw(user.password(), actualUser.password());
         if (!passwordMatches) {
-            throw new DataAccessException("Error: Unauthorized");
+            throw new DataAccessException("Error: unauthorized");
         }
 
         String authToken = generateToken();
@@ -87,7 +87,7 @@ public class UserService {
     public CreateGameResponse createGame(String gameName, String authToken) throws DataAccessException{
         try {
             if (gameName == null) {
-                throw new DataAccessException("Error: Bad Request");
+                throw new DataAccessException("Error: bad request");
             }
             var authData = getAuthData(authToken);
 
@@ -103,7 +103,7 @@ public class UserService {
     private AuthData getAuthData(String authToken) throws DataAccessException{
         try {
             if (authToken == null) {
-                throw new DataAccessException("Error: Bad Request");
+                throw new DataAccessException("Error: bad request");
             }
 
             var authData = dataAccess.getAuthData(authToken);
@@ -155,13 +155,13 @@ public class UserService {
                 throw new DataAccessException("Error: unauthorized");
             }
             if (playerColor == null || (!playerColor.equals("WHITE") && !playerColor.equals("BLACK")) || gameID == null) {
-                throw new DataAccessException("Error: Bad Request");
+                throw new DataAccessException("Error: bad request");
             }
 
             var user = getAuthData(authToken);
             var game = dataAccess.getGame(gameID);
             if (game == null) {
-                throw new DataAccessException("Error: Bad Request");
+                throw new DataAccessException("Error: bad request");
             }
             if ((playerColor.equals("WHITE") && game.whiteUsername() != null) ||
                     (playerColor.equals("BLACK") && game.blackUsername() != null)) {
