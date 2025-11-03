@@ -17,10 +17,10 @@ import java.util.List;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 
-public class mySQLDataAccess implements DataAccess{
+public class MySQLDataAccess implements DataAccess{
 
 
-    public mySQLDataAccess() throws DataAccessException, SQLException {
+    public MySQLDataAccess() throws DataAccessException, SQLException {
         configureDatabase();
     }
 
