@@ -42,6 +42,7 @@ public class DataaccessTest {
 
         Assertions.assertNotEquals(null, res.username());
         Assertions.assertNotEquals(null, res.authToken());
+        Assertions.assertEquals("cow", res.username());
     }
 
     @Test
@@ -108,6 +109,8 @@ public class DataaccessTest {
 
         var res = userService.register(new UserData("bob", "123", "bob@mail"));
         userService.logout(res.authToken());
+        Assertions.assertThrows(DataAccessException.class, () ->
+                userService.createGame("epicGame", res.authToken()));
     }
 
     @Test
