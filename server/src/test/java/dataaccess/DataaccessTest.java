@@ -92,6 +92,8 @@ public class DataaccessTest {
 
         Assertions.assertThrows(DataAccessException.class, ()->
                 userService.login(new UserData("cow", "fake password", null)));
+        Assertions.assertThrows(DataAccessException.class, ()->
+                userService.login(new UserData("cow", null, "jason@2")));
     }
 
     @Test
@@ -135,6 +137,8 @@ public class DataaccessTest {
         Assertions.assertThrows(DataAccessException.class, ()-> userService.createGame("Epic Game", "FakeAuthToken"));
 
         Assertions.assertThrows(DataAccessException.class, ()-> userService.createGame(null, res.authToken()));
+        var res2 = userService.createGame("Epic Game", res.authToken());
+        Assertions.assertNotNull(res2);
     }
 
     @Test
@@ -159,9 +163,9 @@ public class DataaccessTest {
         var res = userService.register(new UserData("bob", "123", "jason@mail"));
         userService.createGame("Epic Game", res.authToken());
 
-
         Assertions.assertThrows(DataAccessException.class, ()-> userService.listGames(null));
-
+        var res2 = userService.listGames(res.authToken());
+        Assertions.assertNotNull(res2);
     }
 
     @Test
