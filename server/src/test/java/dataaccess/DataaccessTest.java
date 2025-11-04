@@ -30,6 +30,7 @@ public class DataaccessTest {
         assertNotNull(da.getUser(user.username()));
         da.clear();
         assertNull(da.getUser(user.username()));
+        assertNull(da.getUser("nonexistent"));
     }
 
 
@@ -70,12 +71,20 @@ public class DataaccessTest {
 
         Assertions.assertThrows(DataAccessException.class, ()->
                 userService.register(new UserData("cow", "rat", "john@1")));
+        Assertions.assertThrows(DataAccessException.class, ()->
+                userService.register(new UserData(null, "rat", "john@1")));
+        Assertions.assertThrows(DataAccessException.class, ()->
+                userService.register(new UserData("cow", null, "john@1")));
+        Assertions.assertThrows(DataAccessException.class, ()->
+                userService.register(new UserData("cow", "rat", null)));
     }
 
     @Test
     public void loginSuccess() throws DataAccessException, SQLException {
         var dataAccess = new MySQLDataAccess();
         var userService = new UserService(dataAccess);
+
+
 
         userService.register((new UserData("cow1", "rat1", "cow1@bob")));
         var res = userService.login(new UserData("cow1", "rat1", null));
@@ -90,8 +99,11 @@ public class DataaccessTest {
         var dataAccess = new MySQLDataAccess();
         var userService = new UserService(dataAccess);
 
+
+        userService.register((new UserData("cow1", "rat1", "cow1@bob")));
+
         Assertions.assertThrows(DataAccessException.class, ()->
-                userService.login(new UserData("cow", "fake password", null)));
+                userService.login(new UserData("cow", "rat1", null)));
         Assertions.assertThrows(DataAccessException.class, ()->
                 userService.login(new UserData("cow", null, "jason@2")));
     }
@@ -102,6 +114,13 @@ public class DataaccessTest {
         var userService = new UserService(dataAccess);
 
         Assertions.assertThrows(DataAccessException.class, ()-> userService.logout("FakeAuthToken"));
+
+        var res = userService.register(new UserData("bob", "123", "bob@mail"));
+        userService.logout(res.authToken());
+
+        Assertions.assertThrows(DataAccessException.class, () ->
+                userService.logout(res.authToken()));
+
     }
 
     @Test
@@ -113,6 +132,7 @@ public class DataaccessTest {
         userService.logout(res.authToken());
         Assertions.assertThrows(DataAccessException.class, () ->
                 userService.createGame("epicGame", res.authToken()));
+
     }
 
     @Test
@@ -139,6 +159,7 @@ public class DataaccessTest {
         Assertions.assertThrows(DataAccessException.class, ()-> userService.createGame(null, res.authToken()));
         var res2 = userService.createGame("Epic Game", res.authToken());
         Assertions.assertNotNull(res2);
+
     }
 
     @Test
@@ -185,6 +206,8 @@ public class DataaccessTest {
 
         Assertions.assertNotNull(res2);
         Assertions.assertEquals(expectedGame, res2);
+
+
     }
 
     @Test
@@ -201,6 +224,8 @@ public class DataaccessTest {
             userService.joinGame("WHITE", 1, res.authToken());
             userService.joinGame("WHITE", 1, "Fake authToken");
         });
+
+        Assertions.assertThrows(DataAccessException.class, ()-> userService.joinGame("WHITE", 10, res.authToken()));
     }
 
 
