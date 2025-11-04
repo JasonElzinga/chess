@@ -227,7 +227,4 @@ public class DataaccessTest {
 
         Assertions.assertThrows(DataAccessException.class, ()-> userService.joinGame("WHITE", 10, res.authToken()));
     }
-
-
-
 }
