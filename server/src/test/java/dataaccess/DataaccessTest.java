@@ -174,6 +174,9 @@ public class DataaccessTest {
         var expectedGame = new ListGameResponse(List.of(new IndividualGameData(1, null, null, "Epic Game")));
         Assertions.assertNotNull(res2);
         Assertions.assertEquals(expectedGame, res2);
+
+        userService.clear();
+        res = userService.register(new UserData("bob", "123", "jason@mail"));
     }
 
     @Test
@@ -206,8 +209,6 @@ public class DataaccessTest {
 
         Assertions.assertNotNull(res2);
         Assertions.assertEquals(expectedGame, res2);
-
-
     }
 
     @Test
