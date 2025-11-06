@@ -32,17 +32,17 @@ public class Main {
         var currentBoard = board.getBoard();
         boolean blackPerspective = (color == ChessGame.TeamColor.BLACK);
 
-        int rowStart = blackPerspective ? 0 : 10;
+        int rowStart = blackPerspective ? 0 : 9;
         int rowStep = blackPerspective ? 1 : -1;
-        int rowEnd = blackPerspective ? 10 : 0;
+        int rowEnd = blackPerspective ? 9 : 0;
 
 
-        for (int row = rowStart; row != rowEnd; row +=rowStep) {
+        for (int row = rowStart; row != rowEnd + rowStep; row +=rowStep) {
 
-            for (int col = rowStart; col != rowEnd; col +=rowStep) {
+            for (int col = rowStart; col != rowEnd + rowStep; col +=rowStep) {
 
                 // color of square
-                if (row < 1 || row >= 9 || col < 0 || col >= 9) {
+                if (row == rowStart || row == rowEnd || col == rowStart || col == rowEnd) {
                     System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
                     System.out.print(EscapeSequences.EMPTY);
                     System.out.print(EscapeSequences.RESET_BG_COLOR);
