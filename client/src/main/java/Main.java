@@ -1,7 +1,7 @@
 import chess.*;
 import ui.EscapeSequences;
 
-import java.util.ArrayList;
+import java.awt.color.ICC_ColorSpace;
 import java.util.Scanner;
 
 public class Main {
@@ -28,65 +28,39 @@ public class Main {
 
 
     private void drawChessBoard(ChessGame board, ChessGame.TeamColor color) {
-//        String[] letters = {
-//                "a",
-//                "b",
-//                "c",
-//                "d",
-//                "e",
-//                "f",
-//                "g",
-//                "h"
-//        };
-//
-//        String[] blackBackRow = {
-//                EscapeSequences.BLACK_ROOK,
-//                EscapeSequences.BLACK_KNIGHT,
-//                EscapeSequences.BLACK_BISHOP,
-//                EscapeSequences.BLACK_QUEEN,
-//                EscapeSequences.BLACK_KING,
-//                EscapeSequences.BLACK_BISHOP,
-//                EscapeSequences.BLACK_KNIGHT,
-//                EscapeSequences.BLACK_ROOK,
-//        };
-//
-//        String[] whiteBackRow = {
-//                EscapeSequences.WHITE_ROOK,
-//                EscapeSequences.WHITE_KNIGHT,
-//                EscapeSequences.WHITE_BISHOP,
-//                EscapeSequences.WHITE_QUEEN,
-//                EscapeSequences.WHITE_KING,
-//                EscapeSequences.WHITE_BISHOP,
-//                EscapeSequences.WHITE_KNIGHT,
-//                EscapeSequences.WHITE_ROOK,
-//        };
 
         var currentBoard = board.getBoard();
         boolean blackPerspective = (color == ChessGame.TeamColor.BLACK);
 
-        int rowStart = blackPerspective ? 0 : 9;
+        int rowStart = blackPerspective ? 0 : 10;
         int rowStep = blackPerspective ? 1 : -1;
-        int rowEnd = blackPerspective ? 9 : 0;
+        int rowEnd = blackPerspective ? 10 : 0;
 
 
         for (int row = rowStart; row != rowEnd; row +=rowStep) {
-            System.out.print(EscapeSequences.SET_TEXT_COLOR_DARK_GREY);
+
             for (int col = rowStart; col != rowEnd; col +=rowStep) {
 
                 // color of square
-                if (row == 0 || row == 9 || col == 0 || col == 9) {
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_DARK_GREY);
+                if (row < 1 || row >= 9 || col < 0 || col >= 9) {
+                    System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
                     System.out.print(EscapeSequences.EMPTY);
-                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                    System.out.print(EscapeSequences.RESET_BG_COLOR);
+                } else {
+                    if ((row + col) % 2 == 0) {
+                        System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
+                    } else {
+                        System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+                    }
                 }
-
-
 
 
                 if (row >= 1 && row <= 8 && col >= 1 && col <= 8) {
                     var piece = currentBoard.getPiece(new ChessPosition(row, col));
                     if (piece == null) {
+                        //System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
                         System.out.print(EscapeSequences.EMPTY);
+                        System.out.print(EscapeSequences.RESET_BG_COLOR);
                     }
                     else {
                         var pieceColor = piece.getTeamColor();
@@ -113,6 +87,7 @@ public class Main {
                                             EscapeSequences.WHITE_PAWN : EscapeSequences.BLACK_PAWN);
                         }
                         System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                        System.out.print(EscapeSequences.RESET_BG_COLOR);
                     }
                 }
             }
