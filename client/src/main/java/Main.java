@@ -62,11 +62,11 @@ public class Main {
 //        };
 
         var currentBoard = board.getBoard();
-        boolean whitePerspective = (color == ChessGame.TeamColor.WHITE);
+        boolean blackPerspective = (color == ChessGame.TeamColor.BLACK);
 
-        int rowStart = whitePerspective ? 0 : 9;
-        int rowStep = whitePerspective ? 1 : -1;
-        int rowEnd = whitePerspective ? 9 : 0;
+        int rowStart = blackPerspective ? 0 : 9;
+        int rowStep = blackPerspective ? 1 : -1;
+        int rowEnd = blackPerspective ? 9 : 0;
 
 
         for (int row = rowStart; row != rowEnd; row +=rowStep) {
@@ -77,6 +77,7 @@ public class Main {
                 if (row == 0 || row == 9 || col == 0 || col == 9) {
                     System.out.print(EscapeSequences.SET_TEXT_COLOR_DARK_GREY);
                     System.out.print(EscapeSequences.EMPTY);
+                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
                 }
 
 
@@ -88,26 +89,30 @@ public class Main {
                         System.out.print(EscapeSequences.EMPTY);
                     }
                     else {
+                        var pieceColor = piece.getTeamColor();
+                        String s = pieceColor == ChessGame.TeamColor.WHITE ? EscapeSequences.SET_TEXT_COLOR_BLUE : EscapeSequences.SET_TEXT_COLOR_RED;
+                        System.out.print(s);
                         switch (piece.getPieceType()) {
                             case ROOK -> System.out.print(
-                                    piece.getTeamColor() == ChessGame.TeamColor.WHITE ?
+                                    pieceColor == ChessGame.TeamColor.WHITE ?
                                             EscapeSequences.WHITE_ROOK : EscapeSequences.BLACK_ROOK);
                             case BISHOP -> System.out.print(
-                                    piece.getTeamColor() == ChessGame.TeamColor.WHITE ?
+                                    pieceColor == ChessGame.TeamColor.WHITE ?
                                             EscapeSequences.WHITE_BISHOP : EscapeSequences.BLACK_BISHOP);
                             case KNIGHT -> System.out.print(
-                                    piece.getTeamColor() == ChessGame.TeamColor.WHITE ?
+                                    pieceColor == ChessGame.TeamColor.WHITE ?
                                             EscapeSequences.WHITE_KNIGHT : EscapeSequences.BLACK_KNIGHT);
                             case KING -> System.out.print(
-                                    piece.getTeamColor() == ChessGame.TeamColor.WHITE ?
+                                    pieceColor == ChessGame.TeamColor.WHITE ?
                                             EscapeSequences.WHITE_KING : EscapeSequences.BLACK_KING);
                             case QUEEN -> System.out.print(
-                                    piece.getTeamColor() == ChessGame.TeamColor.WHITE ?
+                                    pieceColor == ChessGame.TeamColor.WHITE ?
                                             EscapeSequences.WHITE_QUEEN : EscapeSequences.BLACK_QUEEN);
                             case PAWN -> System.out.print(
-                                    piece.getTeamColor() == ChessGame.TeamColor.WHITE ?
+                                    pieceColor == ChessGame.TeamColor.WHITE ?
                                             EscapeSequences.WHITE_PAWN : EscapeSequences.BLACK_PAWN);
                         }
+                        System.out.print(EscapeSequences.RESET_TEXT_COLOR);
                     }
                 }
             }
