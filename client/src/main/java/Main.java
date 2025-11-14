@@ -15,6 +15,7 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         boolean loggedIn = false;
         String authToken = "";
+        String username = "";
 
 
         while (true) {
@@ -35,6 +36,8 @@ public class Main {
                         facade.logout(authToken);
                         loggedIn = false;
                         authToken = "";
+                        username = "";
+                        System.out.println("Logged out");
                     } catch (Exception e) {
                         error("logging out failed");
                     }
@@ -57,7 +60,12 @@ public class Main {
                     }
 
                     try {
-                        facade.login(new UserData(inputs[1], inputs[2], inputs[3]));
+                        var res = facade.login(new UserData(inputs[1], inputs[2], inputs[3]));
+                        loggedIn = true;
+                        authToken = res.authToken();
+                        username = res.username();
+                        System.out.println("Logged in as: " + username);
+
                     } catch (Exception e) {
                         error("Failed logging in");
                     }
@@ -74,7 +82,7 @@ public class Main {
                         wrongInputs();
                         continue;
                     }
-                    var username = inputs[1];
+                    username = inputs[1];
                     var password = inputs[2];
                     var email = inputs[3];
                     try {
@@ -116,7 +124,7 @@ public class Main {
     static void helpLoggedOut() {
         System.out.print("""
         register <USERNAME> <PASSWORD> <EMAIL> - to create an account
-        login <USERNAME> <PASSWORD>            - to play chess
+        login <USERNAME> <PASSWORD> <EMAIL>    - to play chess
         quit                                   - playing chess
         help                                   - with possible commands
         """);
