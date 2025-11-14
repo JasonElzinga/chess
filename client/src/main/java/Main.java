@@ -14,6 +14,7 @@ public class Main {
         System.out.print("♕ 240 Chess Client: type help to get started.\n");
         Scanner scanner = new Scanner(System.in);
         boolean loggedIn = false;
+        String authToken = "";
 
 
         while (true) {
@@ -23,16 +24,23 @@ public class Main {
                 System.out.print("[LOGGED_OUT] >>> ");
             }
             var line = scanner.nextLine();
-//            System.out.print(EscapeSequences.SET_TEXT_COLOR_BLACK);
-//            System.out.print(line + EscapeSequences.BLACK_BISHOP);
-//            System.out.print((EscapeSequences.SET_BG_COLOR_DARK_GREEN));
-//            System.out.print(line + EscapeSequences.WHITE_BISHOP);
-            //main.drawChessBoard(board, ChessGame.TeamColor.WHITE);
             String[] inputs = line.split(" ");
 
             if (loggedIn) {
                 if (inputs[0].equalsIgnoreCase("help")) {
                     helpLoggedIn();
+                }
+                else if (inputs[0].equalsIgnoreCase("logout")) {
+                    try {
+                        facade.logout(authToken);
+                        loggedIn = false;
+                        authToken = "";
+                    } catch (Exception e) {
+                        error("logging out failed");
+                    }
+                }
+                else {
+                    wrongInputs();
                 }
             }
             else {
@@ -43,27 +51,39 @@ public class Main {
                     break;
                 }
                 else if (inputs[0].equalsIgnoreCase("login")) {
-                    //
+                    if (inputs.length != 4) {
+                        wrongInputs();
+                        continue;
+                    }
+
+                    try {
+                        facade.login(new UserData(inputs[1], inputs[2], inputs[3]));
+                    } catch (Exception e) {
+                        error("Failed logging in");
+                    }
                 }
                 else if (inputs[0].equalsIgnoreCase("clear")) {
                     try {
                         facade.clear();
                     } catch (Exception e) {
-                        error();
+                        error("clearing the database failed");
                     }
                 }
                 else if (inputs[0].equalsIgnoreCase("register")) {
                     if (inputs.length != 4) {
                         wrongInputs();
+                        continue;
                     }
                     var username = inputs[1];
                     var password = inputs[2];
                     var email = inputs[3];
                     try {
                         var res = facade.register(new UserData(username, password, email));
-                        System.out.println(res);
+                        System.out.println("registered as: " + res.username());
+                        loggedIn = true;
+                        authToken = res.authToken();
                     } catch (Exception e) {
-                        error();
+                        error("registering failed");
                     }
                 }
                 else {
@@ -77,8 +97,8 @@ public class Main {
         System.out.println("Bad input, you are logged out, type help to see what you can do!");
     }
 
-    static void error() {
-        System.out.println("There was an error, please try again");
+    static void error(String errorMessage) {
+        System.out.println("There was an error: " + errorMessage);
     }
 
     static void helpLoggedIn() {

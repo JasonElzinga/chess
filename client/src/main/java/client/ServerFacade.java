@@ -1,6 +1,8 @@
 package client;
 
 import com.google.gson.Gson;
+import model.AuthData;
+import model.LoginResponse;
 import model.RegisterResponse;
 import model.UserData;
 
@@ -30,7 +32,34 @@ public class ServerFacade {
         sendRequest(req);
     }
 
+    public void logout(String authToken) throws Exception {
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(serverUrl + "/session"))
+                .header("Authorization", authToken)
+                .DELETE()
+                .build();
+        var res = sendRequest(req);
 
+        if (!isSuccessful(res.statusCode())) {
+            throw new Exception("Logout failed: " + res.body());
+        }
+    }
+
+    public LoginResponse login(UserData data) throws Exception {
+        var json = new Gson().toJson(data);
+
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(serverUrl + "/session"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+        var res = sendRequest(req);
+
+        if (!isSuccessful(res.statusCode())) {
+            throw new Exception("Login failed: " + res.body());
+        }
+        return handleResponse(res, LoginResponse.class);
+    }
 
     private HttpRequest buildRequest(String method, String path, Object body) {
         var req = HttpRequest.newBuilder()
@@ -59,13 +88,15 @@ public class ServerFacade {
         }
     }
 
+
+
     private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws Exception {
         var status = response.statusCode();
         if (!isSuccessful(status)) {
             var body = response.body();
             if (body != null && !body.isEmpty()) {
                 var error = new Gson().fromJson(body, Exception.class);
-                throw new Exception(error.getMessage());
+                throw new Exception(error);
             }
 
             throw new Exception("Unknown server error, status: " + status);
@@ -86,6 +117,7 @@ public class ServerFacade {
 
 
     private boolean isSuccessful(int status) { return status / 100 == 2;}
+
 
 
 }
