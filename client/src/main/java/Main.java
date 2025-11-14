@@ -54,7 +54,7 @@ public class Main {
 
 
     static void helpLoggedIn() {
-        System.out.println("""
+        System.out.print("""
         create <NAME>        - a game
         list                 - games
         join <ID> [WHITE|BLACK] - a game
