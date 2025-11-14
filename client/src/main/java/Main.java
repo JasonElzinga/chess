@@ -1,5 +1,6 @@
 import chess.*;
 import client.ServerFacade;
+import model.CreateGameRequest;
 import model.UserData;
 import ui.EscapeSequences;
 
@@ -40,6 +41,19 @@ public class Main {
                         System.out.println("Logged out");
                     } catch (Exception e) {
                         error("logging out failed");
+                    }
+                }
+                else if (inputs[0].equalsIgnoreCase("create")) {
+                    if (inputs.length != 2) {
+                        wrongInputs();
+                        continue;
+                    }
+                    try {
+                        var res = facade.createGame(new CreateGameRequest(inputs[1]), authToken);
+                        System.out.println("Created game: " + inputs[1]);
+
+                    } catch (Exception e) {
+                        error("Failed creating the game");
                     }
                 }
                 else {
@@ -102,7 +116,7 @@ public class Main {
     }
 
     static void wrongInputs() {
-        System.out.println("Bad input, you are logged out, type help to see what you can do!");
+        System.out.println("Bad input, type help to see what you can do!");
     }
 
     static void error(String errorMessage) {

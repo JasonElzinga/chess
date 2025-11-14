@@ -3,6 +3,7 @@ package client;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
+import model.CreateGameRequest;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
@@ -42,7 +43,7 @@ public class ServerFacadeTests {
     void clear() throws Exception {
         var user = new UserData("joe", "j@j", "j");
         var res = facade.register(user);
-
+        Assertions.assertNotNull(res);
         facade.clear();
         Assertions.assertDoesNotThrow(() -> facade.register(user));
 
@@ -51,7 +52,7 @@ public class ServerFacadeTests {
 
     @Test
     public void registerPositiveTest() throws Exception {
-        var testData = new UserData("jason", "123", "j@gmail");
+        var testData = new UserData("jason123", "123", "j@gmail");
         var res = facade.register(testData);
 
         Assertions.assertNotNull(res.authToken());
@@ -92,19 +93,43 @@ public class ServerFacadeTests {
 
 
     @Test
-    public void badLogout() {
-        var testData = new UserData("jason", null, "j@gmail");
-
+    public void badLogout() throws Exception {
+        var testData = new UserData("jason1234", "epic", "j@gmail");
+        facade.register(testData);
         Assertions.assertThrows(Exception.class, ()-> facade.logout("FakeAuthToken"));
     }
 
     @Test
     public void goodLogout() throws Exception {
-        var testData = new UserData("jason", null, "j@gmail");
+        var testData = new UserData("jason1", "epicpassword", "j@gmail");
 
-
-        var res = facade.register(new UserData("bob", "123", "bob@mail"));
+        var res = facade.register(testData);
         facade.logout(res.authToken());
+    }
+
+
+    @Test
+    public void createGameSuccess() throws Exception {
+        var testData = new UserData("jason", "epicpassword", "j@gmail");
+
+
+        var res = facade.register(testData);
+        var res1 = facade.createGame(new CreateGameRequest("epicGame"), res.authToken());
+
+
+        Assertions.assertEquals(1, res1.gameID());
+    }
+
+    @Test
+    public void createGameFail() throws DataAccessException {
+        var dataAccess = new MemoryDataAccess();
+        var userService = new UserService(dataAccess);
+
+        var res = userService.register(new UserData("jason", "123", "jason@mail"));
+
+        Assertions.assertThrows(DataAccessException.class, ()-> userService.createGame("Epic Game", "FakeAuthToken"));
+
+        Assertions.assertThrows(DataAccessException.class, ()-> userService.createGame(null, res.authToken()));
     }
 
 }

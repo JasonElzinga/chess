@@ -1,10 +1,7 @@
 package client;
 
 import com.google.gson.Gson;
-import model.AuthData;
-import model.LoginResponse;
-import model.RegisterResponse;
-import model.UserData;
+import model.*;
 
 import java.io.ObjectStreamException;
 import java.net.URI;
@@ -22,20 +19,35 @@ public class ServerFacade {
 
 
     public RegisterResponse register(UserData data) throws Exception {
-        var req = buildRequest("POST", "/user", data);
+        var json = new Gson().toJson(data);
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(serverUrl + "/user"))
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
         var res = sendRequest(req);
+
+        if (!isSuccessful(res.statusCode())) {
+            throw new Exception("Logout failed: " + res.body());
+        }
+
         return handleResponse(res, RegisterResponse.class);
+//        var req = buildRequest("POST", "/user", data);
+//        var res = sendRequest(req);
     }
 
     public void clear() throws Exception {
-        var req = buildRequest("DELETE", "/db", null);
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(serverUrl + "/db"))
+                .DELETE()
+                .build();
+        var res = sendRequest(req);
         sendRequest(req);
     }
 
     public void logout(String authToken) throws Exception {
         var req = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + "/session"))
-                .header("Authorization", authToken)
+                .header("authorization", authToken)
                 .DELETE()
                 .build();
         var res = sendRequest(req);
@@ -59,6 +71,22 @@ public class ServerFacade {
             throw new Exception("Login failed: " + res.body());
         }
         return handleResponse(res, LoginResponse.class);
+    }
+
+    public CreateGameResponse createGame(CreateGameRequest data, String authToken) throws Exception {
+        var json = new Gson().toJson(data);
+
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(serverUrl + "/game"))
+                .header("authorization", authToken)
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+        var res = sendRequest(req);
+
+        if (!isSuccessful(res.statusCode())) {
+            throw new Exception("Login failed: " + res.body());
+        }
+        return handleResponse(res, CreateGameResponse.class);
     }
 
     private HttpRequest buildRequest(String method, String path, Object body) {
