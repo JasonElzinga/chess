@@ -27,6 +27,26 @@ public class Main {
     }
 
 
+    private void printLetterRow(ChessGame.TeamColor color) {
+        String letters = color == ChessGame.TeamColor.WHITE ? "    a   b   c  d   e   f  g   h    " : "    h   g   f  e   d   c  b   a    ";
+        System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+        System.out.print(EscapeSequences.SET_TEXT_COLOR_BLACK);
+        System.out.print(letters);
+        System.out.print(EscapeSequences.RESET_BG_COLOR);
+        System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+        System.out.print("\n");
+    }
+
+    private void printNumber(int row) {
+        System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+        System.out.print(EscapeSequences.SET_TEXT_COLOR_BLACK);
+        System.out.print(" " + row + " ");
+        System.out.print(EscapeSequences.RESET_BG_COLOR);
+        System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+    }
+
+
+
     private void drawChessBoard(ChessGame board, ChessGame.TeamColor color) {
 
         var currentBoard = board.getBoard();
@@ -36,33 +56,16 @@ public class Main {
         int rowStep = blackPerspective ? 1 : -1;
         int rowEnd = blackPerspective ? 8 : 1;
 
-
+        printLetterRow(color);
         for (int row = rowStart; row != rowEnd + rowStep; row +=rowStep) {
+            printNumber(row);
+            for (int col = 1; col <= 8; col ++) {
 
-            for (int col = 0; col <= 9; col ++) {
 
-                // color of square
-                if ((row == 0 && col == 0) || (row == 9 && col == 0)) {
-                    String letters = color == ChessGame.TeamColor.WHITE ? "    a  b  c  d  e  f  g  h    " : "     h  g  f  e  d  c  b  a    ";
-                    System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_BLACK);
-                    System.out.print(letters);
-                    System.out.print(EscapeSequences.RESET_BG_COLOR);
-                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
-
-                    break;
-                }
-
-                else {
-                    if ((row + col) % 2 == 0) {
-                        System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
-                    } else {
-                        System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
-                    }
-                }
-
-                if (col == 0) {
-
+                if ((row + col) % 2 == 0) {
+                    System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+                } else {
+                    System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
                 }
 
                 if (row >= 1 && row <= 8 && col >= 1 && col <= 8) {
@@ -101,7 +104,10 @@ public class Main {
                     }
                 }
             }
+            printNumber(row);
             System.out.print("\n");
         }
+
+        printLetterRow(color);
     }
 }
