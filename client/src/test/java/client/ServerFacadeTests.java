@@ -91,4 +91,20 @@ public class ServerFacadeTests {
     }
 
 
+    @Test
+    public void badLogout() {
+        var testData = new UserData("jason", null, "j@gmail");
+
+        Assertions.assertThrows(Exception.class, ()-> facade.logout("FakeAuthToken"));
+    }
+
+    @Test
+    public void goodLogout() throws Exception {
+        var testData = new UserData("jason", null, "j@gmail");
+
+
+        var res = facade.register(new UserData("bob", "123", "bob@mail"));
+        facade.logout(res.authToken());
+    }
+
 }
