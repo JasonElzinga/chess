@@ -1,4 +1,5 @@
 import chess.*;
+import client.ServerFacade;
 import model.UserData;
 import ui.EscapeSequences;
 
@@ -43,6 +44,13 @@ public class Main {
                 }
                 else if (inputs[0].equalsIgnoreCase("login")) {
                     //
+                }
+                else if (inputs[0].equalsIgnoreCase("clear")) {
+                    try {
+                        facade.clear();
+                    } catch (Exception e) {
+                        error();
+                    }
                 }
                 else if (inputs[0].equalsIgnoreCase("register")) {
                     if (inputs.length != 4) {

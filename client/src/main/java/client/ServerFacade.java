@@ -1,3 +1,5 @@
+package client;
+
 import com.google.gson.Gson;
 import model.RegisterResponse;
 import model.UserData;
@@ -18,10 +20,16 @@ public class ServerFacade {
 
 
     public RegisterResponse register(UserData data) throws Exception {
-        var req = buildRequest("Post", "/user", data);
+        var req = buildRequest("POST", "/user", data);
         var res = sendRequest(req);
         return handleResponse(res, RegisterResponse.class);
     }
+
+    public void clear() throws Exception {
+        var req = buildRequest("DELETE", "/db", null);
+        sendRequest(req);
+    }
+
 
 
     private HttpRequest buildRequest(String method, String path, Object body) {
@@ -55,20 +63,29 @@ public class ServerFacade {
         var status = response.statusCode();
         if (!isSuccessful(status)) {
             var body = response.body();
-            if (body != null) {
-                // throw something
+            if (body != null && !body.isEmpty()) {
+                var error = new Gson().fromJson(body, Exception.class);
+                throw new Exception(error.getMessage());
             }
 
-            throw new Exception("This didn't work");
+            throw new Exception("Unknown server error, status: " + status);
         }
 
-        if (responseClass != null) {
-            return new Gson().fromJson(response.body(), responseClass);
+        if (responseClass == null) {
+            return null;
         }
-        return null;
+
+        var body = response.body();
+        if (body == null || body.isEmpty()) {
+            return null;
+        }
+
+        return new Gson().fromJson(body, responseClass);
     }
 
 
 
     private boolean isSuccessful(int status) { return status / 100 == 2;}
+
+
 }
