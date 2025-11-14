@@ -56,10 +56,14 @@ public class Main {
         int rowStep = blackPerspective ? 1 : -1;
         int rowEnd = blackPerspective ? 8 : 1;
 
+        int colStart = blackPerspective ? 8 : 1;
+        int colStep = blackPerspective ? -1 : 1;
+        int colEnd = blackPerspective ? 1 : 8;
+
         printLetterRow(color);
         for (int row = rowStart; row != rowEnd + rowStep; row +=rowStep) {
             printNumber(row);
-            for (int col = 1; col <= 8; col ++) {
+            for (int col = colStart; col != colEnd + colStep; col += colStep) {
 
 
                 if ((row + col) % 2 == 0) {
