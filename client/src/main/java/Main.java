@@ -1,4 +1,5 @@
 import chess.*;
+import model.UserData;
 import ui.EscapeSequences;
 
 import java.awt.color.ICC_ColorSpace;
@@ -7,6 +8,7 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         //var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
+        var facade = new ServerFacade("http://localhost:8080");
         ChessGame board = new ChessGame();
         System.out.print("♕ 240 Chess Client: type help to get started.\n");
         Scanner scanner = new Scanner(System.in);
@@ -43,15 +45,33 @@ public class Main {
                     //
                 }
                 else if (inputs[0].equalsIgnoreCase("register")) {
-                    break;
+                    if (inputs.length != 4) {
+                        wrongInputs();
+                    }
+                    var username = inputs[1];
+                    var password = inputs[2];
+                    var email = inputs[3];
+                    try {
+                        var res = facade.register(new UserData(username, password, email));
+                        System.out.println(res);
+                    } catch (Exception e) {
+                        error();
+                    }
                 }
                 else {
-                    System.out.println("Bad input, you are logged out, type help to see what you can do!");
+                    wrongInputs();
                 }
             }
         }
     }
 
+    static void wrongInputs() {
+        System.out.println("Bad input, you are logged out, type help to see what you can do!");
+    }
+
+    static void error() {
+        System.out.println("There was an error, please try again");
+    }
 
     static void helpLoggedIn() {
         System.out.print("""
