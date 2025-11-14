@@ -8,22 +8,70 @@ public class Main {
     public static void main(String[] args) {
         //var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         ChessGame board = new ChessGame();
-        System.out.print("♕ 240 Chess Client: type help to get started.");
+        System.out.print("♕ 240 Chess Client: type help to get started.\n");
         Scanner scanner = new Scanner(System.in);
-        var main = new Main();
+        boolean loggedIn = false;
+
+
         while (true) {
+            if (loggedIn) {
+                System.out.print("[LOGGED_IN] >>> ");
+            } else {
+                System.out.print("[LOGGED_OUT] >>> ");
+            }
             var line = scanner.nextLine();
 //            System.out.print(EscapeSequences.SET_TEXT_COLOR_BLACK);
 //            System.out.print(line + EscapeSequences.BLACK_BISHOP);
 //            System.out.print((EscapeSequences.SET_BG_COLOR_DARK_GREEN));
 //            System.out.print(line + EscapeSequences.WHITE_BISHOP);
-            main.drawChessBoard(board, ChessGame.TeamColor.WHITE);
+            //main.drawChessBoard(board, ChessGame.TeamColor.WHITE);
+            String[] inputs = line.split(" ");
+
+            if (loggedIn) {
+                if (inputs[0].equalsIgnoreCase("help")) {
+                    helpLoggedIn();
+                }
+            }
+            else {
+                if (inputs[0].equalsIgnoreCase("help")) {
+                    helpLoggedOut();
+                }
+                else if (inputs[0].equalsIgnoreCase("quit")) {
+                    break;
+                }
+                else if (inputs[0].equalsIgnoreCase("login")) {
+                    //
+                }
+                else if (inputs[0].equalsIgnoreCase("register")) {
+                    break;
+                }
+                else {
+                    System.out.println("Bad input, you are logged out, type help to see what you can do!");
+                }
+            }
         }
     }
 
 
-    private void help() {
-        System.out.print("register <USERNAME> <PASSWORD>");
+    static void helpLoggedIn() {
+        System.out.println("""
+        create <NAME>        - a game
+        list                 - games
+        join <ID> [WHITE|BLACK] - a game
+        observe <ID>         - a game
+        logout               - when you are done
+        quit                 - playing chess
+        help                 - with possible commands
+        """);
+    }
+
+    static void helpLoggedOut() {
+        System.out.print("""
+        register <USERNAME> <PASSWORD> <EMAIL> - to create an account
+        login <USERNAME> <PASSWORD>            - to play chess
+        quit                                   - playing chess
+        help                                   - with possible commands
+        """);
     }
 
 
