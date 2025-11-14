@@ -32,21 +32,28 @@ public class Main {
         var currentBoard = board.getBoard();
         boolean blackPerspective = (color == ChessGame.TeamColor.BLACK);
 
-        int rowStart = blackPerspective ? 0 : 9;
+        int rowStart = blackPerspective ? 1 : 8;
         int rowStep = blackPerspective ? 1 : -1;
-        int rowEnd = blackPerspective ? 9 : 0;
+        int rowEnd = blackPerspective ? 8 : 1;
 
 
         for (int row = rowStart; row != rowEnd + rowStep; row +=rowStep) {
 
-            for (int col = rowStart; col != rowEnd + rowStep; col +=rowStep) {
+            for (int col = 0; col <= 9; col ++) {
 
                 // color of square
-                if (row == rowStart || row == rowEnd || col == rowStart || col == rowEnd) {
+                if ((row == 0 && col == 0) || (row == 9 && col == 0)) {
+                    String letters = color == ChessGame.TeamColor.WHITE ? "    a  b  c  d  e  f  g  h    " : "     h  g  f  e  d  c  b  a    ";
                     System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
-                    System.out.print(EscapeSequences.EMPTY);
+                    System.out.print(EscapeSequences.SET_TEXT_COLOR_BLACK);
+                    System.out.print(letters);
                     System.out.print(EscapeSequences.RESET_BG_COLOR);
-                } else {
+                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+
+                    break;
+                }
+
+                else {
                     if ((row + col) % 2 == 0) {
                         System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
                     } else {
@@ -54,6 +61,9 @@ public class Main {
                     }
                 }
 
+                if (col == 0) {
+
+                }
 
                 if (row >= 1 && row <= 8 && col >= 1 && col <= 8) {
                     var piece = currentBoard.getPiece(new ChessPosition(row, col));
