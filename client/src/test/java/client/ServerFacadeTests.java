@@ -1,6 +1,5 @@
 package client;
 
-import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import model.*;
@@ -8,10 +7,8 @@ import org.junit.jupiter.api.*;
 import server.Server;
 import service.UserService;
 
-import java.sql.SQLException;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 
 public class ServerFacadeTests {
@@ -24,7 +21,6 @@ public class ServerFacadeTests {
         server = new Server();
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
-        //facade = new ServerFacadeTests(port); //TODO
         String url = "http://localhost:" + port;
         facade = new ServerFacade(url);
         facade.clear();
@@ -65,7 +61,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void registerNegativeTest() throws Exception {
+    public void registerNegativeTest() {
         var testData = new UserData("jason", null, "j@gmail");
         var testData2 = new UserData(null, "123", "j@gmail");
         var testData3 = new UserData("jason", "123", null);
@@ -106,7 +102,7 @@ public class ServerFacadeTests {
 
     @Test
     public void goodLogout() throws Exception {
-        var testData = new UserData("jason1", "epicpassword", "j@gmail");
+        var testData = new UserData("jason1", "epicPassword", "j@gmail");
 
         var res = facade.register(testData);
         facade.logout(res.authToken());
@@ -115,7 +111,7 @@ public class ServerFacadeTests {
 
     @Test
     public void createGameSuccess() throws Exception {
-        var testData = new UserData("jason", "epicpassword", "j@gmail");
+        var testData = new UserData("jason", "epicPassword", "j@gmail");
 
 
         var res = facade.register(testData);
@@ -129,33 +125,32 @@ public class ServerFacadeTests {
     public void createGameFail() throws DataAccessException {
         var dataAccess = new MemoryDataAccess();
         var facade = new UserService(dataAccess);
-
         var res = facade.register(new UserData("jason", "123", "jason@mail"));
-
         Assertions.assertThrows(DataAccessException.class, ()-> facade.createGame("Epic Game", "FakeAuthToken"));
-
         Assertions.assertThrows(DataAccessException.class, ()-> facade.createGame(null, res.authToken()));
     }
 
 
     @Test
     public void listGameSuccess() throws Exception {
-        var user = new UserData("bob", "123", "jason@mail");
+        var user = new UserData("bob2323", "123", "jason@mail");
 
         var res = facade.register(user);
-        facade.createGame(new CreateGameRequest("bob"), res.authToken());
+        facade.createGame(new CreateGameRequest("bob2323"), res.authToken());
         facade.createGame(new CreateGameRequest("epic"), res.authToken());
         facade.createGame(new CreateGameRequest("34"), res.authToken());
 
         var listGames = facade.listGames(res.authToken());
 
-        var expectedGame = new ListGameResponse(List.of(new IndividualGameData(1, null, null, "bob"),new IndividualGameData(2, null, null, "epic"),new IndividualGameData(3, null, null, "34")));
+        var expectedGame = new ListGameResponse(List.of(new IndividualGameData(1, null, null, "bob2323"),
+                new IndividualGameData(2, null, null, "epic"),
+                new IndividualGameData(3, null, null, "34")));
         Assertions.assertEquals(expectedGame,listGames);
     }
 
     @Test
     public void listGameFail() throws Exception {
-        var user = new UserData("bob", "123", "jason@mail");
+        var user = new UserData("bob123", "123", "jason@mail");
 
         var res = facade.register(user);
         facade.createGame(new CreateGameRequest("EpicGame"), res.authToken());
@@ -169,7 +164,7 @@ public class ServerFacadeTests {
 
     @Test
     public void joinGameSuccess() throws Exception {
-        var user = new UserData("bob", "123", "jason@mail");
+        var user = new UserData("bob123", "123", "jason@mail");
         var user2 = new UserData("bob2", "123", "jason@mail");
 
 
@@ -182,7 +177,7 @@ public class ServerFacadeTests {
 
         var res2 = facade.listGames(res.authToken());
         var expectedGame = new ListGameResponse(List.of
-                (new IndividualGameData(1, "bob", "bob2", "epicGame")));
+                (new IndividualGameData(1, "bob123", "bob2", "epicGame")));
 
         Assertions.assertNotNull(res2);
         Assertions.assertEquals(expectedGame, res2);
@@ -193,9 +188,8 @@ public class ServerFacadeTests {
         var dataAccess = new MemoryDataAccess();
         var facade = new UserService(dataAccess);
 
-        var res = facade.register(new UserData("bob", "123", "jason@mail"));
+        var res = facade.register(new UserData("bob123", "123", "jason@mail"));
         facade.createGame("Epic Game", res.authToken());
-
 
         Assertions.assertThrows(DataAccessException.class, ()-> {
             facade.joinGame(null, 1234, res.authToken());

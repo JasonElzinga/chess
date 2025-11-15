@@ -68,33 +68,33 @@ public class Main {
                         wrongInputs();
                         continue;
                     }
+                    if (currentGames[0][0] == 0) {
+                        System.out.println("joining game failed, you need to list the games first and use those numbers to join");
+                        continue;
+                    }
+                    int intendedGameID;
                     try {
-                        if (currentGames[0][0] == 0) {
-                            System.out.println("joining game failed, you need to list the games first and use those numbers to join");
-                            continue;
-                        }
-                        int intendedGameID;
-                        try {
-                            intendedGameID = Integer.parseInt(inputs[1]);
-                        } catch (Exception e) {
-                            System.out.println("joining game failed, you didn't provide a number to join the game");
-                            continue;
-                        }
-                        if (intendedGameID > inputs.length) {
-                            continue;
-                        }
-                        ChessGame.TeamColor color;
-                        if (inputs[2].equalsIgnoreCase("WHITE")) {
-                            color = ChessGame.TeamColor.WHITE;
-                        }
-                        else if (inputs[2].equalsIgnoreCase("BLACK")){
-                            color = ChessGame.TeamColor.BLACK;
-                        }
-                        else {
-                            System.out.println("joining game failed, you didn't provide the right color to join the game");
-                            continue;
-                        };
-                        intendedGameID = currentGames[intendedGameID-1][0];
+                        intendedGameID = Integer.parseInt(inputs[1]);
+                    } catch (Exception e) {
+                        System.out.println("joining game failed, you didn't provide a number to join the game");
+                        continue;
+                    }
+                    if (intendedGameID > inputs.length) {
+                        continue;
+                    }
+                    ChessGame.TeamColor color;
+                    if (inputs[2].equalsIgnoreCase("WHITE")) {
+                        color = ChessGame.TeamColor.WHITE;
+                    }
+                    else if (inputs[2].equalsIgnoreCase("BLACK")){
+                        color = ChessGame.TeamColor.BLACK;
+                    }
+                    else {
+                        System.out.println("joining game failed, you didn't provide the right color to join the game");
+                        continue;
+                    };
+                    intendedGameID = currentGames[intendedGameID-1][0];
+                    try {
                         facade.joinGame(new JoinGameRequest(inputs[2], intendedGameID), authToken);
                         board = new ChessGame();
                         drawChessBoard(board,color);
@@ -297,54 +297,50 @@ public class Main {
         for (int row = rowStart; row != rowEnd + rowStep; row +=rowStep) {
             printNumber(row);
             for (int col = colStart; col != colEnd + colStep; col += colStep) {
-
-
-                if ((row + col) % 2 == 0) {
-                    System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
-                } else {
-                    System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
-                }
-
-                if (row >= 1 && row <= 8 && col >= 1 && col <= 8) {
-                    var piece = currentBoard.getPiece(new ChessPosition(row, col));
-                    if (piece == null) {
-                        //System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
-                        System.out.print(EscapeSequences.EMPTY);
-                        System.out.print(EscapeSequences.RESET_BG_COLOR);
-                    }
-                    else {
-                        var pieceColor = piece.getTeamColor();
-                        String s = pieceColor == ChessGame.TeamColor.WHITE ? EscapeSequences.SET_TEXT_COLOR_BLUE : EscapeSequences.SET_TEXT_COLOR_RED;
-                        System.out.print(s);
-                        switch (piece.getPieceType()) {
-                            case ROOK -> System.out.print(
-                                    pieceColor == ChessGame.TeamColor.WHITE ?
-                                            EscapeSequences.WHITE_ROOK : EscapeSequences.BLACK_ROOK);
-                            case BISHOP -> System.out.print(
-                                    pieceColor == ChessGame.TeamColor.WHITE ?
-                                            EscapeSequences.WHITE_BISHOP : EscapeSequences.BLACK_BISHOP);
-                            case KNIGHT -> System.out.print(
-                                    pieceColor == ChessGame.TeamColor.WHITE ?
-                                            EscapeSequences.WHITE_KNIGHT : EscapeSequences.BLACK_KNIGHT);
-                            case KING -> System.out.print(
-                                    pieceColor == ChessGame.TeamColor.WHITE ?
-                                            EscapeSequences.WHITE_KING : EscapeSequences.BLACK_KING);
-                            case QUEEN -> System.out.print(
-                                    pieceColor == ChessGame.TeamColor.WHITE ?
-                                            EscapeSequences.WHITE_QUEEN : EscapeSequences.BLACK_QUEEN);
-                            case PAWN -> System.out.print(
-                                    pieceColor == ChessGame.TeamColor.WHITE ?
-                                            EscapeSequences.WHITE_PAWN : EscapeSequences.BLACK_PAWN);
-                        }
-                        System.out.print(EscapeSequences.RESET_TEXT_COLOR);
-                        System.out.print(EscapeSequences.RESET_BG_COLOR);
-                    }
-                }
+                printSquare(currentBoard, row, col);
             }
             printNumber(row);
             System.out.print("\n");
         }
-
         printLetterRow(color);
+    }
+
+    private static void printSquare(ChessBoard currentBoard, int row, int col) {
+        // Square color
+        if ((row + col) % 2 == 0) {
+            System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+        } else {
+            System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
+        }
+
+        var piece = currentBoard.getPiece(new ChessPosition(row, col));
+        if (piece == null) {
+            System.out.print(EscapeSequences.EMPTY);
+            System.out.print(EscapeSequences.RESET_BG_COLOR);
+            return;
+        }
+
+        var pieceColor = piece.getTeamColor();
+        String s = pieceColor == ChessGame.TeamColor.WHITE ?
+                EscapeSequences.SET_TEXT_COLOR_BLUE : EscapeSequences.SET_TEXT_COLOR_RED;
+        System.out.print(s);
+
+        switch (piece.getPieceType()) {
+            case ROOK -> System.out.print(pieceColor == ChessGame.TeamColor.WHITE ?
+                    EscapeSequences.WHITE_ROOK : EscapeSequences.BLACK_ROOK);
+            case BISHOP -> System.out.print(pieceColor == ChessGame.TeamColor.WHITE ?
+                    EscapeSequences.WHITE_BISHOP : EscapeSequences.BLACK_BISHOP);
+            case KNIGHT -> System.out.print(pieceColor == ChessGame.TeamColor.WHITE ?
+                    EscapeSequences.WHITE_KNIGHT : EscapeSequences.BLACK_KNIGHT);
+            case KING -> System.out.print(pieceColor == ChessGame.TeamColor.WHITE ?
+                    EscapeSequences.WHITE_KING : EscapeSequences.BLACK_KING);
+            case QUEEN -> System.out.print(pieceColor == ChessGame.TeamColor.WHITE ?
+                    EscapeSequences.WHITE_QUEEN : EscapeSequences.BLACK_QUEEN);
+            case PAWN -> System.out.print(pieceColor == ChessGame.TeamColor.WHITE ?
+                    EscapeSequences.WHITE_PAWN : EscapeSequences.BLACK_PAWN);
+        }
+
+        System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+        System.out.print(EscapeSequences.RESET_BG_COLOR);
     }
 }
