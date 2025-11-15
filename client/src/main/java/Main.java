@@ -116,7 +116,7 @@ public class Main {
                     }
                 }
                 else if (inputs[0].equalsIgnoreCase("observe")) {
-                    if (inputs.length != 1) {
+                    if (inputs.length != 2) {
                         wrongInputs();
                         continue;
                     }
