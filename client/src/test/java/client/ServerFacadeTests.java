@@ -122,12 +122,10 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void createGameFail() throws DataAccessException {
-        var dataAccess = new MemoryDataAccess();
-        var facade = new UserService(dataAccess);
+    public void createGameFail() throws Exception {
         var res = facade.register(new UserData("jason", "123", "jason@mail"));
-        Assertions.assertThrows(DataAccessException.class, ()-> facade.createGame("Epic Game", "FakeAuthToken"));
-        Assertions.assertThrows(DataAccessException.class, ()-> facade.createGame(null, res.authToken()));
+        Assertions.assertThrows(Exception.class, ()-> facade.createGame(new CreateGameRequest("epicGame"), "FakeAuthToken"));
+        Assertions.assertThrows(Exception.class, ()-> facade.createGame(null, res.authToken()));
     }
 
 

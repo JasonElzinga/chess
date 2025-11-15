@@ -105,24 +105,6 @@ public class ServerFacade {
         return handleResponse(res, CreateGameResponse.class);
     }
 
-    private HttpRequest buildRequest(String method, String path, Object body) {
-        var req = HttpRequest.newBuilder()
-                .uri(URI.create(serverUrl + path))
-                .method(method, makeRequestBody(body));
-        if (body != null) {
-            req.setHeader("Content-Type", "application/json");
-        }
-        return req.build();
-    }
-
-    private HttpRequest.BodyPublisher makeRequestBody(Object req) {
-        if (req != null) {
-            return HttpRequest.BodyPublishers.ofString(new Gson().toJson(req));
-        }
-        else {
-            return HttpRequest.BodyPublishers.noBody();
-        }
-    }
 
     private HttpResponse<String> sendRequest(HttpRequest req) throws Exception {
         try {

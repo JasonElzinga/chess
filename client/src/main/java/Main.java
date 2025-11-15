@@ -120,11 +120,11 @@ public class Main {
                         wrongInputs();
                         continue;
                     }
-                    if (currentGames[0][0] == 0) {
+                    if (currentGames[0][0] == 0) //this is very important {
                         System.out.println("joining game failed, you need to list the games first and use those numbers to join");
                         continue;
                     }
-                    int intendedGameID;
+                    int intendedGameID; //getID
                     try {
                         intendedGameID = Integer.parseInt(inputs[1]);
                     } catch (Exception e) {
