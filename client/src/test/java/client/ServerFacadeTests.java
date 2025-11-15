@@ -3,13 +3,13 @@ package client;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
-import model.CreateGameRequest;
-import model.UserData;
+import model.*;
 import org.junit.jupiter.api.*;
 import server.Server;
 import service.UserService;
 
 import java.sql.SQLException;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,6 +29,11 @@ public class ServerFacadeTests {
         facade = new ServerFacade(url);
         facade.clear();
 
+    }
+
+    @BeforeEach
+    void reset() throws Exception {
+        facade.clear();
     }
 
 
@@ -123,13 +128,79 @@ public class ServerFacadeTests {
     @Test
     public void createGameFail() throws DataAccessException {
         var dataAccess = new MemoryDataAccess();
-        var userService = new UserService(dataAccess);
+        var facade = new UserService(dataAccess);
 
-        var res = userService.register(new UserData("jason", "123", "jason@mail"));
+        var res = facade.register(new UserData("jason", "123", "jason@mail"));
 
-        Assertions.assertThrows(DataAccessException.class, ()-> userService.createGame("Epic Game", "FakeAuthToken"));
+        Assertions.assertThrows(DataAccessException.class, ()-> facade.createGame("Epic Game", "FakeAuthToken"));
 
-        Assertions.assertThrows(DataAccessException.class, ()-> userService.createGame(null, res.authToken()));
+        Assertions.assertThrows(DataAccessException.class, ()-> facade.createGame(null, res.authToken()));
     }
 
+
+    @Test
+    public void listGameSuccess() throws Exception {
+        var user = new UserData("bob", "123", "jason@mail");
+
+        var res = facade.register(user);
+        facade.createGame(new CreateGameRequest("bob"), res.authToken());
+        facade.createGame(new CreateGameRequest("epic"), res.authToken());
+        facade.createGame(new CreateGameRequest("34"), res.authToken());
+
+        var listGames = facade.listGames(res.authToken());
+
+        var expectedGame = new ListGameResponse(List.of(new IndividualGameData(1, null, null, "bob"),new IndividualGameData(2, null, null, "epic"),new IndividualGameData(3, null, null, "34")));
+        Assertions.assertEquals(expectedGame,listGames);
+    }
+
+    @Test
+    public void listGameFail() throws Exception {
+        var user = new UserData("bob", "123", "jason@mail");
+
+        var res = facade.register(user);
+        facade.createGame(new CreateGameRequest("EpicGame"), res.authToken());
+        facade.createGame(new CreateGameRequest("SillyGame"), res.authToken());
+        facade.createGame(new CreateGameRequest("EpicGame24"), res.authToken());
+        facade.createGame(new CreateGameRequest("WhatGame"), res.authToken());
+
+
+        Assertions.assertThrows(Exception.class, ()-> facade.listGames(null));
+    }
+
+    @Test
+    public void joinGameSuccess() throws Exception {
+        var user = new UserData("bob", "123", "jason@mail");
+        var user2 = new UserData("bob2", "123", "jason@mail");
+
+
+        var res = facade.register(user);
+        var res1 = facade.register(user2);
+        facade.createGame(new CreateGameRequest("epicGame"), res.authToken());
+        facade.joinGame(new JoinGameRequest("WHITE", 1),  res.authToken());
+        facade.joinGame(new JoinGameRequest("BLACK", 1),  res1.authToken());
+
+
+        var res2 = facade.listGames(res.authToken());
+        var expectedGame = new ListGameResponse(List.of
+                (new IndividualGameData(1, "bob", "bob2", "epicGame")));
+
+        Assertions.assertNotNull(res2);
+        Assertions.assertEquals(expectedGame, res2);
+    }
+
+    @Test
+    public void joinGameFail() throws DataAccessException {
+        var dataAccess = new MemoryDataAccess();
+        var facade = new UserService(dataAccess);
+
+        var res = facade.register(new UserData("bob", "123", "jason@mail"));
+        facade.createGame("Epic Game", res.authToken());
+
+
+        Assertions.assertThrows(DataAccessException.class, ()-> {
+            facade.joinGame(null, 1234, res.authToken());
+            facade.joinGame("WHITE", 1234, res.authToken());
+            facade.joinGame("WHITE", 1234, "Fake authToken");
+        });
+    }
 }

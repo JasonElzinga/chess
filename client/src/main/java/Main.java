@@ -1,10 +1,14 @@
 import chess.*;
 import client.ServerFacade;
 import model.CreateGameRequest;
+import model.JoinGameRequest;
+import model.ListGameResponse;
 import model.UserData;
 import ui.EscapeSequences;
 
 import java.awt.color.ICC_ColorSpace;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
@@ -17,6 +21,8 @@ public class Main {
         boolean loggedIn = false;
         String authToken = "";
         String username = "";
+        int[][] currentGames = new int[1][1];
+        currentGames[0][0] = 0;
 
 
         while (true) {
@@ -43,6 +49,59 @@ public class Main {
                         error("logging out failed");
                     }
                 }
+                else if (inputs[0].equalsIgnoreCase("list")) {
+                    if (inputs.length != 1) {
+                        wrongInputs();
+                        continue;
+                    }
+                    try {
+                        var games = facade.listGames(authToken);
+                        //System.out.println(games);
+                        listGames(games);
+                        currentGames = assignNumbersToGames(games);
+                    } catch (Exception e) {
+                        error("listing games failed");
+                    }
+                }
+                else if (inputs[0].equalsIgnoreCase("join")) {
+                    if (inputs.length != 3) {
+                        wrongInputs();
+                        continue;
+                    }
+                    try {
+                        if (currentGames[0][0] == 0) {
+                            System.out.println("joining game failed, you need to list the games first and use those numbers to join");
+                            continue;
+                        }
+                        int intendedGameID;
+                        try {
+                            intendedGameID = Integer.parseInt(inputs[1]);
+                        } catch (Exception e) {
+                            System.out.println("joining game failed, you didn't provide a number to join the game");
+                            continue;
+                        }
+                        if (intendedGameID > inputs.length) {
+                            continue;
+                        }
+                        ChessGame.TeamColor color;
+                        if (inputs[2].equalsIgnoreCase("WHITE")) {
+                            color = ChessGame.TeamColor.WHITE;
+                        }
+                        else if (inputs[2].equalsIgnoreCase("BLACK")){
+                            color = ChessGame.TeamColor.BLACK;
+                        }
+                        else {
+                            System.out.println("joining game failed, you didn't provide the right color to join the game");
+                            continue;
+                        };
+                        intendedGameID = currentGames[intendedGameID-1][0];
+                        facade.joinGame(new JoinGameRequest(inputs[2], intendedGameID), authToken);
+                        board = new ChessGame();
+                        drawChessBoard(board,color);
+                    } catch (Exception e) {
+                        error("joining game failed");
+                    }
+                }
                 else if (inputs[0].equalsIgnoreCase("create")) {
                     if (inputs.length != 2) {
                         wrongInputs();
@@ -54,6 +113,33 @@ public class Main {
 
                     } catch (Exception e) {
                         error("Failed creating the game");
+                    }
+                }
+                else if (inputs[0].equalsIgnoreCase("observe")) {
+                    if (inputs.length != 1) {
+                        wrongInputs();
+                        continue;
+                    }
+                    if (currentGames[0][0] == 0) {
+                        System.out.println("joining game failed, you need to list the games first and use those numbers to join");
+                        continue;
+                    }
+                    int intendedGameID;
+                    try {
+                        intendedGameID = Integer.parseInt(inputs[1]);
+                    } catch (Exception e) {
+                        System.out.println("joining game failed, you didn't provide a number to join the game");
+                        continue;
+                    }
+                    if (intendedGameID > inputs.length) {
+                        continue;
+                    }
+                    try {
+                        board = new ChessGame();
+                        drawChessBoard(board, ChessGame.TeamColor.WHITE);
+
+                    } catch (Exception e) {
+                        error("Failed observing the game");
                     }
                 }
                 else {
@@ -115,12 +201,41 @@ public class Main {
         }
     }
 
+    static int[][] assignNumbersToGames(ListGameResponse res) {
+        var games = res.games();
+        int[][] arr = new int[games.size()][2];
+
+        int assigned = 1;
+        int index = 0;
+
+        for (var g : games) {
+            arr[index][0] = assigned;
+            arr[index][1] = g.gameID();
+            assigned++;
+            index++;
+        }
+
+        return arr;
+    }
+
+    static void listGames(ListGameResponse games) {
+        int i = 0;
+        for (var game : games.games()) {
+            i++;
+            System.out.printf("Game %d: Name: %s (White %s, Black: %s)%n",
+                    i,
+                    game.gameName(),
+                    game.whiteUsername(),
+                    game.blackUsername());
+        }
+    }
+
     static void wrongInputs() {
         System.out.println("Bad input, type help to see what you can do!");
     }
 
     static void error(String errorMessage) {
-        System.out.println("There was an error: " + errorMessage);
+        System.out.println(errorMessage);
     }
 
     static void helpLoggedIn() {
@@ -145,7 +260,7 @@ public class Main {
     }
 
 
-    private void printLetterRow(ChessGame.TeamColor color) {
+    private static void printLetterRow(ChessGame.TeamColor color) {
         String letters = color == ChessGame.TeamColor.WHITE ? "    a   b   c  d   e   f  g   h    " : "    h   g   f  e   d   c  b   a    ";
         System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
         System.out.print(EscapeSequences.SET_TEXT_COLOR_BLACK);
@@ -155,7 +270,7 @@ public class Main {
         System.out.print("\n");
     }
 
-    private void printNumber(int row) {
+    private static void printNumber(int row) {
         System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
         System.out.print(EscapeSequences.SET_TEXT_COLOR_BLACK);
         System.out.print(" " + row + " ");
@@ -165,7 +280,7 @@ public class Main {
 
 
 
-    private void drawChessBoard(ChessGame board, ChessGame.TeamColor color) {
+    static private void drawChessBoard(ChessGame board, ChessGame.TeamColor color) {
 
         var currentBoard = board.getBoard();
         boolean blackPerspective = (color == ChessGame.TeamColor.BLACK);

@@ -73,6 +73,22 @@ public class ServerFacade {
         return handleResponse(res, LoginResponse.class);
     }
 
+    public ListGameResponse listGames(String authToken) throws Exception {
+
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(serverUrl + "/game"))
+                .header("authorization", authToken)
+                .GET()
+                .build();
+
+        var res = sendRequest(req);
+
+        if (!isSuccessful(res.statusCode())) {
+            throw new Exception("Login failed: " + res.body());
+        }
+        return handleResponse(res, ListGameResponse.class);
+    }
+
     public CreateGameResponse createGame(CreateGameRequest data, String authToken) throws Exception {
         var json = new Gson().toJson(data);
 
@@ -147,5 +163,18 @@ public class ServerFacade {
     private boolean isSuccessful(int status) { return status / 100 == 2;}
 
 
+    public void joinGame(JoinGameRequest data, String authToken) throws Exception {
+        var json = new Gson().toJson(data);
 
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(serverUrl + "/game"))
+                .header("authorization", authToken)
+                .PUT(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+        var res = sendRequest(req);
+
+        if (!isSuccessful(res.statusCode())) {
+            throw new Exception("Login failed: " + res.body());
+        }
+    }
 }
