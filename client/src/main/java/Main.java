@@ -79,7 +79,8 @@ public class Main {
                         System.out.println("joining game failed, you didn't provide a number to join the game");
                         continue;
                     }
-                    if (intendedGameID > inputs.length) {
+                    if (intendedGameID > inputs.length || intendedGameID <=0) {
+                        wrongInputs();
                         continue;
                     }
                     ChessGame.TeamColor color;
@@ -131,9 +132,10 @@ public class Main {
                         System.out.println("joining game failed, you didn't provide a number to join the game");
                         continue;
                     }
-                    if (intendedGameID > inputs.length) {
+                    if (intendedGameID > inputs.length +1 || intendedGameID <= 0) {
+                        wrongInputs();
                         continue;
-                    }
+                    } // -4 for joining, make sure to print error to join game 27, and then observe
                     try {
                         board = new ChessGame();
                         drawChessBoard(board, ChessGame.TeamColor.WHITE);
