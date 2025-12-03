@@ -33,6 +33,7 @@ public class Main {
         int[][] currentGames = new int[1][1];
         currentGames[0][0] = 0;
         boolean playing = false;
+        boolean observing = false;
         ChessGame.TeamColor playingColor = ChessGame.TeamColor.WHITE;
 
 
@@ -41,12 +42,22 @@ public class Main {
                 System.out.print("[LOGGED_IN] >>> ");
             } else if (playing) {
                 System.out.print("[PLAYING] " + username + playingColor);
+            } else if (observing) {
+                System.out.print("[Observing]");
             }
             else {
                 System.out.print("[LOGGED_OUT] >>> ");
             }
             var line = scanner.nextLine();
             String[] inputs = line.split(" ");
+
+
+            if (playing || observing) {
+                if (inputs[0].equalsIgnoreCase("help")) {
+                    helpPlaying();
+                }
+            }
+
 
             if (loggedIn) {
                 if (inputs[0].equalsIgnoreCase("help")) {
@@ -114,6 +125,7 @@ public class Main {
                         board = new ChessGame();
                         drawChessBoard(board,color);
                         ws.connect(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, intendedGameID));
+                        playing = true;
                     } catch (Exception e) {
                         error("joining game failed");
                     }
@@ -263,6 +275,16 @@ public class Main {
         observe <ID>         - a game
         logout               - when you are done
         quit                 - playing chess
+        help                 - with possible commands
+        """);
+    }
+
+    static void helpPlaying() {
+        System.out.print("""
+        redraw               - chess board
+        leave                - game
+        make move <starting location> <endlocation> (e2 e4)
+        resign               - game
         help                 - with possible commands
         """);
     }
