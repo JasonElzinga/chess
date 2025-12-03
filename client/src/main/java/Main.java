@@ -1,22 +1,29 @@
 import chess.*;
 import client.ServerFacade;
+import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
+import exception.ResponseException;
 import model.CreateGameRequest;
 import model.JoinGameRequest;
 import model.ListGameResponse;
 import model.UserData;
 import ui.EscapeSequences;
+import websocket.commands.UserGameCommand;
+import websocket.messages.ServerMessage;
 
+import javax.management.NotificationFilter;
 import java.awt.color.ICC_ColorSpace;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
-    public static void main(String[] args)  {
+
+    public static void main(String[] args) throws ResponseException {
         //var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
+        Main handler = new Main();
         var facade = new ServerFacade("http://localhost:8080");
-        WebSocketFacade ws = new WebSocketFacade("http://localhost:8080", );
+        WebSocketFacade ws = new WebSocketFacade("http://localhost:8080");
         ChessGame board = new ChessGame();
         System.out.print("♕ 240 Chess Client: type help to get started.\n");
         Scanner scanner = new Scanner(System.in);
@@ -347,4 +354,6 @@ public class Main {
         System.out.print(EscapeSequences.RESET_TEXT_COLOR);
         System.out.print(EscapeSequences.RESET_BG_COLOR);
     }
+
+
 }

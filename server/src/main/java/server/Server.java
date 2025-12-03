@@ -23,7 +23,7 @@ public class Server {
     private DataAccess dataAccess;
     private final WebSocketHandler webSocketHandler;
 
-    public Server(WebSocketHandler webSocketHandler) {
+    public Server() {
         //this.dataAccess = new MemoryDataAccess();
         try {
             this.dataAccess = new MySQLDataAccess();
@@ -35,7 +35,7 @@ public class Server {
 
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
-        this.webSocketHandler = webSocketHandler;
+        this.webSocketHandler = new WebSocketHandler();
 
         server.post("user", this::register);
         server.post("session", this::login);
