@@ -21,6 +21,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     @Override
     public void handleConnect(WsConnectContext ctx) {
         System.out.println("Websocket connected");
+        connections.add(ctx.session);
         ctx.enableAutomaticPings();
     }
 
@@ -53,6 +54,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private void connect(UserGameCommand command, Session session) throws IOException {
         System.out.println("Yooo this is working, in connect");
+        connections.broadcast(session, "Yooo someone connected");
     }
 
     private void exit(String visitorName, Session session) throws IOException {

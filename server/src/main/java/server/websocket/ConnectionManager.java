@@ -17,14 +17,13 @@ public class ConnectionManager {
         connections.remove(session);
     }
 
-//    public void broadcast(Session excludeSession, Notification notification) throws IOException {
-//        String msg = notification.toString();
-//        for (Session c : connections.values()) {
-//            if (c.isOpen()) {
-//                if (!c.equals(excludeSession)) {
-//                    c.getRemote().sendString(msg);
-//                }
-//            }
-//        }
-//    }
+    public void broadcast(Session excludeSession, String msg) throws IOException {
+        for (Session c : connections.values()) {
+            if (c.isOpen()) {
+                if (!c.equals(excludeSession)) {
+                    c.getRemote().sendString(msg);
+                }
+            }
+        }
+    }
 }

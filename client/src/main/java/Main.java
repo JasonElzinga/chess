@@ -88,7 +88,7 @@ public class Main {
                         System.out.println("joining game failed, you didn't provide a number to join the game");
                         continue;
                     }
-                    if (intendedGameID > inputs.length || intendedGameID <=0) {
+                    if (intendedGameID <=0) {
                         wrongInputs();
                         continue;
                     }
