@@ -32,12 +32,17 @@ public class Main {
         String username = "";
         int[][] currentGames = new int[1][1];
         currentGames[0][0] = 0;
+        boolean playing = false;
+        ChessGame.TeamColor playingColor = ChessGame.TeamColor.WHITE;
 
 
         while (true) {
-            if (loggedIn) {
+            if (loggedIn && !playing) {
                 System.out.print("[LOGGED_IN] >>> ");
-            } else {
+            } else if (playing) {
+                System.out.print("[PLAYING] " + username + playingColor);
+            }
+            else {
                 System.out.print("[LOGGED_OUT] >>> ");
             }
             var line = scanner.nextLine();
