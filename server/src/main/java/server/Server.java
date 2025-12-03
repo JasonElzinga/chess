@@ -10,6 +10,7 @@ import model.UserData;
 import io.javalin.*;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
+import server.websocket.WebSocketHandler;
 import service.UserService;
 
 import java.sql.SQLException;
@@ -20,8 +21,9 @@ public class Server {
     private final Javalin server;
     private UserService userService;
     private DataAccess dataAccess;
+    private final WebSocketHandler webSocketHandler;
 
-    public Server() {
+    public Server(WebSocketHandler webSocketHandler) {
         //this.dataAccess = new MemoryDataAccess();
         try {
             this.dataAccess = new MySQLDataAccess();
@@ -33,6 +35,8 @@ public class Server {
 
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
+        this.webSocketHandler = webSocketHandler;
+
         server.post("user", this::register);
         server.post("session", this::login);
         server.delete("session", this::logout);
@@ -40,7 +44,12 @@ public class Server {
         server.post("game", this::createGame);
         server.get("game", this::listGames);
         server.put("game", this::joinGame);
-        // Register your endpoints and exception handlers here.
+
+        server.ws("/ws", ws -> {
+            ws.onConnect(webSocketHandler);
+            ws.onMessage(webSocketHandler);
+            ws.onClose(webSocketHandler);
+        });
 
     }
 

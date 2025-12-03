@@ -1,5 +1,6 @@
 import chess.*;
 import client.ServerFacade;
+import client.websocket.WebSocketFacade;
 import model.CreateGameRequest;
 import model.JoinGameRequest;
 import model.ListGameResponse;
@@ -12,9 +13,10 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args)  {
         //var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         var facade = new ServerFacade("http://localhost:8080");
+        WebSocketFacade ws = new WebSocketFacade("http://localhost:8080", );
         ChessGame board = new ChessGame();
         System.out.print("♕ 240 Chess Client: type help to get started.\n");
         Scanner scanner = new Scanner(System.in);
