@@ -3,6 +3,7 @@ package client.websocket;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import jakarta.websocket.*;
+import websocket.commands.UserGameCommand;
 
 
 import java.io.IOException;
@@ -29,6 +30,7 @@ public class WebSocketFacade extends Endpoint {
                 public void onMessage(String message) {
                     //Notification notification = new Gson().fromJson(message, Notification.class);
                     //notificationHandler.notify(notification);
+                    System.out.println(message);
                 }
             });
         } catch (DeploymentException | IOException | URISyntaxException ex) {
@@ -39,14 +41,17 @@ public class WebSocketFacade extends Endpoint {
     //Endpoint requires this method, but you don't have to do anything
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
-        System.out.println("This is working");
+        this.session = session;
+        System.out.println("opened the connection");
     }
 
-//    public void sendMessage(String msg) {
-//        try {
-//            this.session
-//        }
-//    }
+    public void connect(UserGameCommand command) throws ResponseException {
+        try {
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+        } catch (IOException ex) {
+            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+        }
+    }
 
 //    public void leave(String visitorName) throws ResponseException {
 //        try {

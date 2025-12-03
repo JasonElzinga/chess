@@ -8,7 +8,9 @@ import io.javalin.websocket.WsConnectContext;
 import io.javalin.websocket.WsConnectHandler;
 import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
+import org.eclipse.jetty.server.Authentication;
 import org.eclipse.jetty.websocket.api.Session;
+import websocket.commands.UserGameCommand;
 
 import java.io.IOException;
 
@@ -24,15 +26,17 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     @Override
     public void handleMessage(WsMessageContext ctx) {
-//        try {
-//            Action action = new Gson().fromJson(ctx.message(), Action.class);
-//            switch (action.type()) {
-//                case ENTER -> enter(action.visitorName(), ctx.session);
-//                case EXIT -> exit(action.visitorName(), ctx.session);
-//            }
-//        } catch (IOException ex) {
-//            ex.printStackTrace();
-//        }
+        try {
+            UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+            switch (command.getCommandType()) {
+                case CONNECT -> connect(command, ctx.session);
+//                case MAKE_MOVE -> exit(command.visitorName(), ctx.session);
+//                case LEAVE -> exit(command.visitorName(), ctx.session);
+//                case RESIGN -> exit(command.visitorName(), ctx.session);
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Override
@@ -45,6 +49,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 //        var message = String.format("%s is in the shop", visitorName);
 //        var notification = new Notification(Notification.Type.ARRIVAL, message);
 //        connections.broadcast(session, notification);
+    }
+
+    private void connect(UserGameCommand command, Session session) throws IOException {
+        System.out.println("Yooo this is working, in connect");
     }
 
     private void exit(String visitorName, Session session) throws IOException {

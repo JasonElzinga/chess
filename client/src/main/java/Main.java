@@ -108,6 +108,7 @@ public class Main {
                         facade.joinGame(new JoinGameRequest(inputs[2], intendedGameID), authToken);
                         board = new ChessGame();
                         drawChessBoard(board,color);
+                        ws.connect(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, intendedGameID));
                     } catch (Exception e) {
                         error("joining game failed");
                     }
