@@ -34,6 +34,7 @@ public class Main {
         currentGames[0][0] = 0;
         boolean playing = false;
         boolean observing = false;
+
         ChessGame.TeamColor playingColor = ChessGame.TeamColor.WHITE;
 
 
@@ -41,7 +42,7 @@ public class Main {
             if (loggedIn && !playing) {
                 System.out.print("[LOGGED_IN] >>> ");
             } else if (playing) {
-                System.out.print("[PLAYING] " + username + playingColor);
+                System.out.print("[PLAYING as " + username + " as " + playingColor + "] >>> ");
             } else if (observing) {
                 System.out.print("[Observing]");
             }
@@ -59,7 +60,7 @@ public class Main {
             }
 
 
-            if (loggedIn) {
+            else if (loggedIn) {
                 if (inputs[0].equalsIgnoreCase("help")) {
                     helpLoggedIn();
                 }
@@ -109,23 +110,29 @@ public class Main {
                         continue;
                     }
                     ChessGame.TeamColor color;
-                    if (inputs[2].equalsIgnoreCase("WHITE")) {
+                    String colorStr;
+                    if (inputs[2].equalsIgnoreCase("white")) {
                         color = ChessGame.TeamColor.WHITE;
+                        colorStr = "white";
                     }
-                    else if (inputs[2].equalsIgnoreCase("BLACK")){
+                    else if (inputs[2].equalsIgnoreCase("black")){
                         color = ChessGame.TeamColor.BLACK;
+                        colorStr = "black";
                     }
                     else {
                         System.out.println("joining game failed, you didn't provide the right color to join the game");
                         continue;
                     };
                     intendedGameID = currentGames[intendedGameID-1][0];
+                    String msg;
                     try {
-                        facade.joinGame(new JoinGameRequest(inputs[2], intendedGameID), authToken);
+                        facade.joinGame(new JoinGameRequest(colorStr, intendedGameID), authToken);
+                        playing = true;
+                        playingColor = color;
                         board = new ChessGame();
                         drawChessBoard(board,color);
-                        ws.connect(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, intendedGameID));
-                        playing = true;
+                        msg = username + " is playing " + playingColor;
+                        ws.connect(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, intendedGameID, msg));
                     } catch (Exception e) {
                         error("joining game failed");
                     }

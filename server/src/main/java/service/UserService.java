@@ -154,7 +154,7 @@ public class UserService {
             if (authToken == null) {
                 throw new DataAccessException("Error: unauthorized");
             }
-            if (playerColor == null || (!playerColor.equals("WHITE") && !playerColor.equals("BLACK")) || gameID == null) {
+            if (playerColor == null || (!playerColor.equalsIgnoreCase("WHITE") && !playerColor.equalsIgnoreCase("BLACK")) || gameID == null) {
                 throw new DataAccessException("Error: bad request");
             }
 
