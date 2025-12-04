@@ -16,16 +16,12 @@ public class UserGameCommand {
 
     private final Integer gameID;
 
-    private final String username;
 
-    private final String playingColor;
-
-    public UserGameCommand(CommandType commandType, String authToken, Integer gameID, String username, String playingColor) {
+    public UserGameCommand(CommandType commandType, String authToken, Integer gameID) {
         this.commandType = commandType;
         this.authToken = authToken;
         this.gameID = gameID;
-        this.playingColor = playingColor;
-        this.username = username;
+
     }
 
     public enum CommandType {
@@ -47,13 +43,7 @@ public class UserGameCommand {
         return gameID;
     }
 
-    public String getUsername() {
-        return username;
-    }
 
-    public String getPlayingColor() {
-        return playingColor;
-    }
 
 
 

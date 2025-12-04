@@ -144,7 +144,7 @@ public class ChessClient implements NotificationHandler {
                         board = new ChessGame();
                         drawChessBoard(board,color);
 
-                        ws.connect(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, intendedGameID, username, colorStr));
+                        ws.connect(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, intendedGameID));
                     } catch (Exception e) {
                         error("joining game failed");
                     }

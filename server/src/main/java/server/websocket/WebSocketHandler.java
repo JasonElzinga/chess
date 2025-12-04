@@ -3,6 +3,7 @@ package server.websocket;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
 import exception.ResponseException;
 import io.javalin.websocket.WsCloseContext;
 import io.javalin.websocket.WsCloseHandler;
@@ -65,10 +66,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void connect(UserGameCommand command, Session session) throws IOException {
-
         try {
-            var username = dataAccess.getAuthData(command.getAuthToken()).authToken();
+            var username = dataAccess.getAuthData(command.getAuthToken()).username();
             var game = dataAccess.getGame(command.getGameID());
+            if (game == null) {
+                throw new DataAccessException("Game is null");
+            }
             ChessGame.TeamColor playingColor;
             if (game.whiteUsername().equalsIgnoreCase(username)) {
                 playingColor = ChessGame.TeamColor.WHITE;
@@ -76,17 +79,18 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 playingColor = ChessGame.TeamColor.BLACK;
             }
             var msg = username + " is playing " + playingColor;
-            System.out.println(msg);
+            //System.out.println(msg);
             var notification = new NotificationMessage(msg);
-            connections.add(session);
-            connections.broadcast(session, notification);
+
+            connections.broadcast(session, notification, command.getGameID());
 
             var serializer = new Gson();
             var gameJson = serializer.toJson(game.game());
             var loadGameNotification = new LoadGameMessage(gameJson);
             connections.loadGame(session, loadGameNotification);
+            connections.add(session, command.getGameID());
         } catch (Exception e) {
-            var errorMessage = new ErrorMessage("Loading the game didn't work");
+            var errorMessage = new ErrorMessage("Error loading the game didn't work");
             connections.errorMessage(session, errorMessage);
         }
 
