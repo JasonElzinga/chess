@@ -20,12 +20,36 @@ public class ConnectionManager {
     }
 
     public void broadcast(Session excludeSession, ServerMessage notification) throws IOException {
-        //String msg = notification.toString();
+
         var serializer = new Gson();
 
         for (Session c : connections.values()) {
             if (c.isOpen()) {
                 if (!c.equals(excludeSession)) {
+                    c.getRemote().sendString(serializer.toJson(notification));
+                }
+            }
+        }
+    }
+
+    public void loadGame(Session excludeSession, ServerMessage notification) throws IOException {
+
+        var serializer = new Gson();
+
+        for (Session c : connections.values()) {
+            if (c.equals(excludeSession)) {
+                c.getRemote().sendString(serializer.toJson(notification));
+            }
+        }
+    }
+
+    public void errorMessage(Session excludeSession, ServerMessage notification) throws IOException {
+
+        var serializer = new Gson();
+
+        for (Session c : connections.values()) {
+            if (c.isOpen()) {
+                if (c.equals(excludeSession)) {
                     c.getRemote().sendString(serializer.toJson(notification));
                 }
             }

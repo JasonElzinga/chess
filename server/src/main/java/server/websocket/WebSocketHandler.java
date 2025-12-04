@@ -1,6 +1,8 @@
 package server.websocket;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
+import dataaccess.DataAccess;
 import exception.ResponseException;
 import io.javalin.websocket.WsCloseContext;
 import io.javalin.websocket.WsCloseHandler;
@@ -11,13 +13,21 @@ import io.javalin.websocket.WsMessageHandler;
 import org.eclipse.jetty.server.Authentication;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.websocket.api.Session;
+import service.UserService;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
+    private final DataAccess dataAccess;
+
+    public WebSocketHandler(DataAccess dataAccess) {
+        this.dataAccess = dataAccess;
+    }
 
     private final ConnectionManager connections = new ConnectionManager();
 
@@ -55,10 +65,31 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void connect(UserGameCommand command, Session session) throws IOException {
-        connections.add(session);
-        var msg = command.getUsername() + " is playing " + command.getPlayingColor();
-        var notification = new NotificationMessage(msg);
-        connections.broadcast(session, notification);
+
+        try {
+            var username = dataAccess.getAuthData(command.getAuthToken()).authToken();
+            var game = dataAccess.getGame(command.getGameID());
+            ChessGame.TeamColor playingColor;
+            if (game.whiteUsername().equalsIgnoreCase(username)) {
+                playingColor = ChessGame.TeamColor.WHITE;
+            } else {
+                playingColor = ChessGame.TeamColor.BLACK;
+            }
+            var msg = username + " is playing " + playingColor;
+            System.out.println(msg);
+            var notification = new NotificationMessage(msg);
+            connections.add(session);
+            connections.broadcast(session, notification);
+
+            var serializer = new Gson();
+            var gameJson = serializer.toJson(game.game());
+            var loadGameNotification = new LoadGameMessage(gameJson);
+            connections.loadGame(session, loadGameNotification);
+        } catch (Exception e) {
+            var errorMessage = new ErrorMessage("Loading the game didn't work");
+            connections.errorMessage(session, errorMessage);
+        }
+
     }
 
     private void exit(String visitorName, Session session) throws IOException {

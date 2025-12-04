@@ -35,7 +35,7 @@ public class Server {
 
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
-        this.webSocketHandler = new WebSocketHandler();
+        this.webSocketHandler = new WebSocketHandler(dataAccess);
 
         server.post("user", this::register);
         server.post("session", this::login);
