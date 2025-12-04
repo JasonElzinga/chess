@@ -12,6 +12,7 @@ import org.eclipse.jetty.server.Authentication;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.commands.UserGameCommand;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -56,7 +57,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void connect(UserGameCommand command, Session session) throws IOException {
         connections.add(session);
         var msg = command.getUsername() + " is playing " + command.getPlayingColor();
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
+        var notification = new NotificationMessage(msg);
         connections.broadcast(session, notification);
     }
 

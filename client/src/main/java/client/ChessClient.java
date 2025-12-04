@@ -5,6 +5,7 @@ import chess.ChessGame;
 import chess.ChessPosition;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
+import com.google.gson.Gson;
 import exception.ResponseException;
 import model.CreateGameRequest;
 import model.JoinGameRequest;
@@ -12,6 +13,8 @@ import model.ListGameResponse;
 import model.UserData;
 import ui.EscapeSequences;
 import websocket.commands.UserGameCommand;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import javax.management.NotificationFilter;
@@ -403,6 +406,17 @@ public class ChessClient implements NotificationHandler {
 
     @Override
     public void notify(ServerMessage notification) {
-        //TODO
+        switch (notification.getServerMessageType()) {
+            case NOTIFICATION -> {
+                NotificationMessage note = (NotificationMessage) notification;
+                System.out.println(note.getMessage());
+            }
+            case ERROR -> System.out.println(notification.toString());
+            case LOAD_GAME -> loadGame((LoadGameMessage) notification);
+        }
+    }
+
+    private void loadGame(LoadGameMessage notification) {
+        ChessGame game = new Gson().fromJson(notification.getGame(), ChessGame.class);
     }
 }

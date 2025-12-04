@@ -40,4 +40,8 @@ public class ServerMessage {
     public int hashCode() {
         return Objects.hash(getServerMessageType());
     }
+
+    public String getMessage() {
+        return "";
+    }
 }
