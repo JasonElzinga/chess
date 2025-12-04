@@ -25,6 +25,11 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     @Override
+    public void updateGame(ChessGame game, Integer gameID) throws DataAccessException {
+        //
+    }
+
+    @Override
     public void clear() {
         users.clear();
         nextGameID = 1234;
@@ -62,6 +67,11 @@ public class MemoryDataAccess implements DataAccess{
     @Override
     public GameData getGame(Integer gameID) {
         return gameData.get(gameID);
+    }
+
+    @Override
+    public void updateUserGame(ChessGame game, Integer gameID, ChessGame.TeamColor color) throws DataAccessException {
+        //
     }
 
     @Override

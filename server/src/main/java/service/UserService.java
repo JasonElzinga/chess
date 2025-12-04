@@ -1,4 +1,5 @@
 package service;
+import chess.ChessGame;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import model.*;
@@ -169,6 +170,20 @@ public class UserService {
             }
 
             dataAccess.joinGame(user.username(), playerColor, gameID);
+        } catch (DataAccessException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new DataAccessException("Error: database failure");
+        }
+    }
+
+    public void updateGame(ChessGame game, Integer gameID) throws DataAccessException {
+
+        try {
+            if (game == null || gameID == null) {
+                throw new DataAccessException("Error: bad request");
+            }
+            dataAccess.updateGame(game, gameID);
         } catch (DataAccessException e) {
             throw e;
         } catch (Exception e) {

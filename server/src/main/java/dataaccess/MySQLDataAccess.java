@@ -75,6 +75,23 @@ public class MySQLDataAccess implements DataAccess{
     }
 
     @Override
+    public void updateGame(ChessGame game, Integer gameID) throws DataAccessException {
+        var serializer = new Gson();
+        var jsonGame = serializer.toJson(game);
+        var statement = "UPDATE gamedata SET game=? WHERE gameID=?";
+        executeUpdate(statement, jsonGame, gameID);
+    }
+
+    @Override
+    public void updateUserGame(ChessGame game, Integer gameID, ChessGame.TeamColor color) throws DataAccessException {
+        var serializer = new Gson();
+        var jsonGame = serializer.toJson(game);
+        var statement = color == ChessGame.TeamColor.WHITE ? "UPDATE gamedata SET whiteusername=? WHERE gameID=?" :
+                                                            "UPDATE gamedata SET blackusername=? WHERE gameID=?";
+        executeUpdate(statement, null, gameID);
+    }
+
+    @Override
     public void storeAuth(AuthData auth) throws DataAccessException {
         var statement = "INSERT INTO authdata (authtoken, username) VALUES (?, ?)";
         //String json = new Gson().toJson(user);

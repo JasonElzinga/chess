@@ -1,7 +1,9 @@
 package server.websocket;
 
 import com.google.gson.Gson;
+import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.ServerMessage;
 //import webSocketMessages.Notification;
 
@@ -19,17 +21,26 @@ public class ConnectionManager {
     }
 
     public void remove(Session session, int gameID) {
-        connections.remove(session);
+        var sessions = gameSessions.get(gameID);
+        if (sessions != null) {
+            sessions.remove(session);
+
+            if (sessions.isEmpty()) {
+                gameSessions.remove(gameID);
+            }
+        }
     }
 
-    public void broadcast(Session excludeSession, ServerMessage notification, int gameID) throws IOException {
+    public void broadcast(Session excludeSession, ServerMessage notification, Integer gameID) throws IOException {
         Set<Session> sessions = gameSessions.get(gameID);
         var serializer = new Gson();
 
         if (sessions != null) {
             for (Session s : sessions) {
                 if (s.isOpen()) {
-                    s.getRemote().sendString(serializer.toJson(notification));
+                    if (s!= excludeSession) {
+                        s.getRemote().sendString(serializer.toJson(notification));
+                    }
                 }
             }
         }
@@ -62,5 +73,18 @@ public class ConnectionManager {
 //                }
 //            }
 //        }
+    }
+
+    public void makeMove(int gameID, LoadGameMessage notification) throws IOException {
+        Set<Session> sessions = gameSessions.get(gameID);
+        var serializer = new Gson();
+
+        if (sessions != null) {
+            for (Session s : sessions) {
+                if (s.isOpen()) {
+                    s.getRemote().sendString(serializer.toJson(notification));
+                }
+            }
+        }
     }
 }

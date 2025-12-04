@@ -1,25 +1,22 @@
 package server.websocket;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
-import exception.ResponseException;
 import io.javalin.websocket.WsCloseContext;
 import io.javalin.websocket.WsCloseHandler;
 import io.javalin.websocket.WsConnectContext;
 import io.javalin.websocket.WsConnectHandler;
 import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
-import org.eclipse.jetty.server.Authentication;
-import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.websocket.api.Session;
-import service.UserService;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
-import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 
@@ -42,14 +39,53 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     public void handleMessage(WsMessageContext ctx) {
         try {
             UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+
             switch (command.getCommandType()) {
                 case CONNECT -> connect(command, ctx.session);
-                case MAKE_MOVE -> makeMove(command, ctx.session);
-//                case LEAVE -> exit(command.visitorName(), ctx.session);
-//                case RESIGN -> exit(command.visitorName(), ctx.session);
+                case MAKE_MOVE -> {
+                    MakeMoveCommand moveCommand = new Gson().fromJson(ctx.message(), MakeMoveCommand.class);
+                    makeMove(moveCommand, ctx.session);
+                }
+                case LEAVE -> leave(command, ctx.session);
+                case RESIGN -> resign(command, ctx.session);
             }
-        } catch (IOException ex) {
+        } catch (IOException | DataAccessException ex) {
             ex.printStackTrace();
+        }
+    }
+
+    private void resign(UserGameCommand command, Session session) {
+        try {
+            var username = dataAccess.getAuthData(command.getAuthToken()).username();
+            var gameData = dataAccess.getGame(command.getGameID());
+            if (gameData == null) {
+                throw new DataAccessException("Game is null");
+            }
+            var game = gameData.game();
+            ChessGame.TeamColor playingColor;
+            if (gameData.whiteUsername() != null) {
+                if (gameData.whiteUsername().equalsIgnoreCase(username)) {
+                    playingColor = ChessGame.TeamColor.WHITE;
+                } else {
+                    playingColor = ChessGame.TeamColor.BLACK;
+                }
+            } else {
+                if (gameData.blackUsername().equalsIgnoreCase(username)) {
+                    playingColor = ChessGame.TeamColor.BLACK;
+                } else {
+                    playingColor = ChessGame.TeamColor.WHITE;
+                }
+            }
+            var msg = username + " has left ";
+            var notification = new NotificationMessage(msg);
+
+            connections.broadcast(session, notification, gameData.gameID());
+            //connections.remove(session, command.getGameID());
+            dataAccess.updateGameState(game);
+
+        } catch (Exception e) {
+            var errorMessage = new ErrorMessage("Error: " + e.getMessage());
+            connections.errorMessage(session, errorMessage);
         }
     }
 
@@ -58,32 +94,51 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         System.out.println("Websocket closed");
     }
 
-    private void makeMove(UserGameCommand command, Session session) throws IOException {
+    private void makeMove(MakeMoveCommand command, Session session) throws IOException {
+        ChessGame newGame;
         try {
             var username = dataAccess.getAuthData(command.getAuthToken()).username();
-            var game = dataAccess.getGame(command.getGameID());
-            if (game == null) {
+            var gameData = dataAccess.getGame(command.getGameID());
+            if (gameData == null) {
                 throw new DataAccessException("Game is null");
             }
+            var game = gameData.game();
+
+            var teamTurn = game.getTeamTurn();
             ChessGame.TeamColor playingColor;
-            if (game.whiteUsername().equalsIgnoreCase(username)) {
+
+            if (gameData.whiteUsername().equalsIgnoreCase(username)) {
                 playingColor = ChessGame.TeamColor.WHITE;
             } else {
                 playingColor = ChessGame.TeamColor.BLACK;
             }
-            var msg = username + " is playing " + playingColor;
-            //System.out.println(msg);
-            var notification = new NotificationMessage(msg);
+            if (playingColor != teamTurn) {
+                throw new DataAccessException("Not your turn");
+            }
 
-            connections.broadcast(session, notification, command.getGameID());
+            ChessMove move = command.getChessMove();
+            if (move == null) {
+                throw new DataAccessException("Move is null");
+            }
+            try {
+                gameData.game().makeMove(move);
+                gameData.game().setTeamTurn(playingColor == ChessGame.TeamColor.WHITE ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE);
+                dataAccess.updateGame(gameData.game(), gameData.gameID());
+                newGame = dataAccess.getGame(gameData.gameID()).game();
+                if (newGame.equals(gameData.game())) {
+                    System.out.println("The move didn't actually work");
+                }
+            } catch (Exception e) {
+                throw new DataAccessException("Move was invalid");
+            }
 
-            var serializer = new Gson();
-            var gameJson = serializer.toJson(game.game());
-            var loadGameNotification = new LoadGameMessage(gameJson);
-            connections.loadGame(session, loadGameNotification);
-            connections.add(session, command.getGameID());
+            var gameJson = new Gson().toJson(newGame);
+            var makeMoveMessage = new LoadGameMessage(gameJson);
+            connections.makeMove(gameData.gameID(), makeMoveMessage);
+            var notification = new NotificationMessage("move: " + move);
+            connections.broadcast(session, notification, gameData.gameID());
         } catch (Exception e) {
-            var errorMessage = new ErrorMessage("Error loading the game didn't work");
+            var errorMessage = new ErrorMessage("Error: " + e.getMessage());
             connections.errorMessage(session, errorMessage);
         }
     }
@@ -113,26 +168,45 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             connections.loadGame(session, loadGameNotification);
             connections.add(session, command.getGameID());
         } catch (Exception e) {
-            var errorMessage = new ErrorMessage("Error loading the game didn't work");
+            var errorMessage = new ErrorMessage("Error: " + e.getMessage());
             connections.errorMessage(session, errorMessage);
         }
 
     }
 
-    private void exit(String visitorName, Session session) throws IOException {
-//        var message = String.format("%s left the shop", visitorName);
-//        var notification = new Notification(Notification.Type.DEPARTURE, message);
-//        connections.broadcast(session, notification);
-//        connections.remove(session);
+    private void leave(UserGameCommand command, Session session) throws IOException, DataAccessException {
+        try {
+            var username = dataAccess.getAuthData(command.getAuthToken()).username();
+            var gameData = dataAccess.getGame(command.getGameID());
+            if (gameData == null) {
+                throw new DataAccessException("Game is null");
+            }
+            var game = gameData.game();
+            ChessGame.TeamColor playingColor;
+            if (gameData.whiteUsername() != null) {
+                if (gameData.whiteUsername().equalsIgnoreCase(username)) {
+                    playingColor = ChessGame.TeamColor.WHITE;
+                } else {
+                    playingColor = ChessGame.TeamColor.BLACK;
+                }
+            } else {
+                if (gameData.blackUsername().equalsIgnoreCase(username)) {
+                    playingColor = ChessGame.TeamColor.BLACK;
+                } else {
+                    playingColor = ChessGame.TeamColor.WHITE;
+                }
+            }
+            var msg = username + " has left ";
+            var notification = new NotificationMessage(msg);
+
+            connections.broadcast(session, notification, gameData.gameID());
+            connections.remove(session, command.getGameID());
+            dataAccess.updateUserGame(game, command.getGameID(), playingColor);
+
+        } catch (Exception e) {
+            var errorMessage = new ErrorMessage("Error: " + e.getMessage());
+            connections.errorMessage(session, errorMessage);
+        }
     }
 
-    public void makeNoise(String petName, String sound) throws ResponseException {
-//        try {
-//            var message = String.format("%s says %s", petName, sound);
-//            var notification = new Notification(Notification.Type.NOISE, message);
-//            connections.broadcast(null, notification);
-//        } catch (Exception ex) {
-//            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
-//        }
-    }
 }
