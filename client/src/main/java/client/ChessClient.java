@@ -12,6 +12,7 @@ import model.ListGameResponse;
 import model.UserData;
 import ui.EscapeSequences;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ServerMessage;
 
 import javax.management.NotificationFilter;
 import java.util.Scanner;
@@ -138,8 +139,8 @@ public class ChessClient implements NotificationHandler {
                         playingColor = color;
                         board = new ChessGame();
                         drawChessBoard(board,color);
-                        msg = username + " is playing " + playingColor;
-                        ws.connect(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, intendedGameID, msg));
+
+                        ws.connect(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, intendedGameID, username, colorStr));
                     } catch (Exception e) {
                         error("joining game failed");
                     }
@@ -243,6 +244,8 @@ public class ChessClient implements NotificationHandler {
             }
         }
     }
+
+
 
     static int[][] assignNumbersToGames(ListGameResponse res) {
         var games = res.games();
@@ -398,4 +401,8 @@ public class ChessClient implements NotificationHandler {
     }
 
 
+    @Override
+    public void notify(ServerMessage notification) {
+        //TODO
+    }
 }

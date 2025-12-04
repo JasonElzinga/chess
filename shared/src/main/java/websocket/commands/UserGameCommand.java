@@ -16,13 +16,16 @@ public class UserGameCommand {
 
     private final Integer gameID;
 
-    private final String message;
+    private final String username;
 
-    public UserGameCommand(CommandType commandType, String authToken, Integer gameID, String message) {
+    private final String playingColor;
+
+    public UserGameCommand(CommandType commandType, String authToken, Integer gameID, String username, String playingColor) {
         this.commandType = commandType;
         this.authToken = authToken;
         this.gameID = gameID;
-        this.message = message;
+        this.playingColor = playingColor;
+        this.username = username;
     }
 
     public enum CommandType {
@@ -44,9 +47,14 @@ public class UserGameCommand {
         return gameID;
     }
 
-    public String getMessage() {
-        return message;
+    public String getUsername() {
+        return username;
     }
+
+    public String getPlayingColor() {
+        return playingColor;
+    }
+
 
 
     @Override

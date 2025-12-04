@@ -9,8 +9,10 @@ import io.javalin.websocket.WsConnectHandler;
 import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
 import org.eclipse.jetty.server.Authentication;
+import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 
@@ -21,7 +23,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     @Override
     public void handleConnect(WsConnectContext ctx) {
         System.out.println("Websocket connected");
-        connections.add(ctx.session);
         ctx.enableAutomaticPings();
     }
 
@@ -53,8 +54,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void connect(UserGameCommand command, Session session) throws IOException {
-        System.out.println("Yooo this is working, in connect");
-        connections.broadcast(session, command.getMessage());
+        connections.add(session);
+        var msg = command.getUsername() + " is playing " + command.getPlayingColor();
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
+        connections.broadcast(session, notification);
     }
 
     private void exit(String visitorName, Session session) throws IOException {
