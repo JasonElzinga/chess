@@ -24,6 +24,11 @@ public class ChessClient implements NotificationHandler {
 
     private final ServerFacade facade;
     private final WebSocketFacade ws;
+    private boolean playing;
+    private String username;
+    private boolean loggedIn;
+    private boolean observing;
+    private ChessGame.TeamColor playingColor;
 
     public ChessClient(String serverUrl) throws ResponseException {
         facade = new ServerFacade(serverUrl);
@@ -38,28 +43,20 @@ public class ChessClient implements NotificationHandler {
 
         System.out.print("♕ 240 Chess Client: type help to get started.\n");
         Scanner scanner = new Scanner(System.in);
-        boolean loggedIn = false;
         String authToken = "";
-        String username = "";
         int[][] currentGames = new int[1][1];
         currentGames[0][0] = 0;
-        boolean playing = false;
-        boolean observing = false;
 
-        ChessGame.TeamColor playingColor = ChessGame.TeamColor.WHITE;
+        this.loggedIn = false;
+        this.username = "";
+        this.playing = false;
+        this.observing = false;
+        this.playingColor = ChessGame.TeamColor.WHITE;
 
 
         while (true) {
-            if (loggedIn && !playing) {
-                System.out.print("[LOGGED_IN] >>> ");
-            } else if (playing) {
-                System.out.print("[PLAYING as " + username + " as " + playingColor + "] >>> ");
-            } else if (observing) {
-                System.out.print("[Observing]");
-            }
-            else {
-                System.out.print("[LOGGED_OUT] >>> ");
-            }
+            padding(loggedIn, playing, observing, username, playingColor);
+
             var line = scanner.nextLine();
             String[] inputs = line.split(" ");
 
@@ -134,7 +131,11 @@ public class ChessClient implements NotificationHandler {
                         System.out.println("joining game failed, you didn't provide the right color to join the game");
                         continue;
                     };
-                    intendedGameID = currentGames[intendedGameID-1][0];
+                    try {
+                        intendedGameID = currentGames[intendedGameID - 1][0];
+                    } catch (Exception e) {
+                        wrongInputs();
+                    }
                     String msg;
                     try {
                         facade.joinGame(new JoinGameRequest(colorStr, intendedGameID), authToken);
@@ -248,6 +249,18 @@ public class ChessClient implements NotificationHandler {
         }
     }
 
+    private void padding(boolean loggedIn, boolean playing, boolean observing, String username, ChessGame.TeamColor playingColor) {
+        if (loggedIn && !playing) {
+            System.out.print("[LOGGED_IN] >>> ");
+        } else if (playing) {
+            System.out.print("[PLAYING as " + username + " as " + playingColor + "] >>> ");
+        } else if (observing) {
+            System.out.print("[Observing]");
+        }
+        else {
+            System.out.print("[LOGGED_OUT] >>> ");
+        }
+    }
 
 
     static int[][] assignNumbersToGames(ListGameResponse res) {
@@ -408,15 +421,16 @@ public class ChessClient implements NotificationHandler {
     public void notify(ServerMessage notification) {
         switch (notification.getServerMessageType()) {
             case NOTIFICATION -> {
-                NotificationMessage note = (NotificationMessage) notification;
-                System.out.println(note.getMessage());
+                System.out.println(notification.getMessage());
             }
-            case ERROR -> System.out.println(notification.toString());
+            case ERROR -> System.out.println(notification.getMessage());
             case LOAD_GAME -> loadGame((LoadGameMessage) notification);
         }
+        padding(loggedIn, playing, observing, username, playingColor);
+
     }
 
     private void loadGame(LoadGameMessage notification) {
-        ChessGame game = new Gson().fromJson(notification.getGame(), ChessGame.class);
+        ChessGame game = new Gson().fromJson(notification.getMessage(), ChessGame.class);
     }
 }

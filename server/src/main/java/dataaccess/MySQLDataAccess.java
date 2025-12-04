@@ -155,7 +155,7 @@ public class MySQLDataAccess implements DataAccess{
     @Override
     public void joinGame(String username, String playerColor, Integer gameID) throws DataAccessException {
         String statement = "";
-        if (playerColor.equals("WHITE")) {
+        if (playerColor.equalsIgnoreCase("WHITE")) {
             statement = "UPDATE gamedata SET whiteusername= ? WHERE gameID=?";
         } else {
             statement = "UPDATE gamedata SET blackusername= ? WHERE gameID=?";

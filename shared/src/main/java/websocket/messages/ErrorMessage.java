@@ -12,6 +12,7 @@ public class ErrorMessage extends ServerMessage{
     public String getMessage() {
         return errorMessage;
     }
+    @Override
     public String toString() {
         return errorMessage;
     }

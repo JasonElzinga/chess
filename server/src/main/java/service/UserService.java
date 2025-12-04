@@ -163,8 +163,8 @@ public class UserService {
             if (game == null) {
                 throw new DataAccessException("Error: bad request");
             }
-            if ((playerColor.equals("WHITE") && game.whiteUsername() != null) ||
-                    (playerColor.equals("BLACK") && game.blackUsername() != null)) {
+            if ((playerColor.equalsIgnoreCase("WHITE") && game.whiteUsername() != null) ||
+                    (playerColor.equalsIgnoreCase("BLACK") && game.blackUsername() != null)) {
                 throw new DataAccessException("Error: already taken");
             }
 
