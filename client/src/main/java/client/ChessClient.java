@@ -1,9 +1,6 @@
 package client;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessMove;
-import chess.ChessPosition;
+import chess.*;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
 import com.google.gson.Gson;
@@ -13,6 +10,7 @@ import model.JoinGameRequest;
 import model.ListGameResponse;
 import model.UserData;
 import ui.EscapeSequences;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
@@ -76,8 +74,8 @@ public class ChessClient implements NotificationHandler {
                     playing = false;
                 }
                 else if (inputs[0].equalsIgnoreCase("move")) {
-                    ChessMove move = getChessMove(inputs[1]);
-                    ws.connect(new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID));
+                    ChessMove move = getChessMove(inputs[1], null);
+                    ws.connect(new MakeMoveCommand(authToken, gameID, move));
                 }
                 else if (inputs[0].equalsIgnoreCase("resign")) {
                     if (confirmResignation()) {
@@ -275,14 +273,14 @@ public class ChessClient implements NotificationHandler {
         }
     }
 
-    private ChessMove getChessMove(String move) {
+    private ChessMove getChessMove(String move,  ChessPiece.PieceType promotionType) {
         int fromCol = move.charAt(0) - 'a' + 1;
         int fromRow = move.charAt(1) - '0';
 
         int toCol = move.charAt(3) - 'a' + 1;
         int toRow = move.charAt(4) - '0';
 
-        return new ChessMove(new ChessPosition(fromRow, fromCol), new ChessPosition(toRow, toCol), null);
+        return new ChessMove(new ChessPosition(fromRow, fromCol), new ChessPosition(toRow, toCol), promotionType);
     }
 
     private boolean confirmResignation() {
