@@ -74,7 +74,20 @@ public class ChessClient implements NotificationHandler {
                     playing = false;
                 }
                 else if (inputs[0].equalsIgnoreCase("move")) {
-                    ChessMove move = getChessMove(inputs[1], null);
+                    ChessPiece.PieceType pieceType;
+                    if (inputs.length == 2) {
+                        pieceType = null;
+                    } else if (inputs.length == 3) {
+                        pieceType = getPieceType(inputs[2]);
+                        if (pieceType == null) {
+                            wrongInputs();
+                            continue;
+                        }
+                    } else {
+                        wrongInputs();
+                        continue;
+                    }
+                    ChessMove move = getChessMove(inputs[1], pieceType);
                     ws.connect(new MakeMoveCommand(authToken, gameID, move));
                 }
                 else if (inputs[0].equalsIgnoreCase("resign")) {
@@ -83,7 +96,8 @@ public class ChessClient implements NotificationHandler {
                     }
                 }
             }
-
+            // TODO you need to fix so it will get rid of the player when you leave
+            // TODO when you just exit without leaving what happens
 
             else if (loggedIn) {
                 if (inputs[0].equalsIgnoreCase("help")) {
@@ -273,12 +287,28 @@ public class ChessClient implements NotificationHandler {
         }
     }
 
+    private ChessPiece.PieceType getPieceType(String type) {
+        if (type.equalsIgnoreCase("Rook")) {
+            return ChessPiece.PieceType.ROOK;
+        }
+        if (type.equalsIgnoreCase("Knight")) {
+            return ChessPiece.PieceType.KNIGHT;
+        }
+        if (type.equalsIgnoreCase("Bishop")) {
+            return ChessPiece.PieceType.BISHOP;
+        }
+        if (type.equalsIgnoreCase("Queen")) {
+            return ChessPiece.PieceType.QUEEN;
+        }
+        return null;
+    }
+
     private ChessMove getChessMove(String move,  ChessPiece.PieceType promotionType) {
         int fromCol = move.charAt(0) - 'a' + 1;
         int fromRow = move.charAt(1) - '0';
 
-        int toCol = move.charAt(3) - 'a' + 1;
-        int toRow = move.charAt(4) - '0';
+        int toCol = move.charAt(2) - 'a' + 1;
+        int toRow = move.charAt(3) - '0';
 
         return new ChessMove(new ChessPosition(fromRow, fromCol), new ChessPosition(toRow, toCol), promotionType);
     }
@@ -364,7 +394,7 @@ public class ChessClient implements NotificationHandler {
         System.out.print("""
         redraw               - chess board
         leave                - game
-        move <starting location><endlocation> (e2e4) a piece
+        move <starting location><endlocation> (e2e4) <promation piece> (if pawn will be promoted>)
         resign               - game
         help                 - with possible commands
         """);
