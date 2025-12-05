@@ -87,7 +87,13 @@ public class ChessClient implements NotificationHandler {
                         wrongInputs();
                         continue;
                     }
-                    ChessMove move = getChessMove(inputs[1], pieceType);
+                    ChessMove move;
+                    try {
+                        move = getChessMove(inputs[1], pieceType);
+                    } catch (Exception e) {
+                        wrongInputs();
+                        continue;
+                    }
                     ws.connect(new MakeMoveCommand(authToken, gameID, move));
                 }
                 else if (inputs[0].equalsIgnoreCase("resign")) {
