@@ -73,16 +73,19 @@ public class ChessClient implements NotificationHandler {
                     playing = false;
                 }
                 else if (inputs[0].equalsIgnoreCase("move")) {
+                    boolean checkNext = false;
                     ChessPiece.PieceType pieceType;
                     if (inputs.length == 2) {
                         pieceType = null;
                     } else if (inputs.length == 3) {
+                        checkNext = true;
                         pieceType = getPieceType(inputs[2]);
-                        if (pieceType == null) {
-                            wrongInputs();
-                            continue;
-                        }
-                    } else {
+                    }
+                    else {
+                        wrongInputs();
+                        continue;
+                    }
+                    if (pieceType == null && checkNext) {
                         wrongInputs();
                         continue;
                     }
@@ -123,7 +126,7 @@ public class ChessClient implements NotificationHandler {
                     continue;
                 }
             }
-            // TODO when you just exit without leaving what happens
+            // to do when you just exit without leaving what happens
 
 
             else if (loggedIn) {
@@ -525,7 +528,9 @@ public class ChessClient implements NotificationHandler {
 
 
 
-    static private void drawChessBoard(ChessGame board, ChessGame.TeamColor color, Set<ChessPosition> chessPositionsToHighlight, ChessPosition startPos) {
+    static private void drawChessBoard(
+            ChessGame board, ChessGame.TeamColor color,
+            Set<ChessPosition> chessPositionsToHighlight, ChessPosition startPos) {
 
         var currentBoard = board.getBoard();
         boolean blackPerspective = (color == ChessGame.TeamColor.BLACK);
@@ -555,7 +560,9 @@ public class ChessClient implements NotificationHandler {
     }
 
 
-    private static void printHighlightedSquare(ChessBoard currentBoard, int row, int col, Set<ChessPosition> chessPositionsToHighlight, ChessPosition startPos) {
+    private static void printHighlightedSquare(
+            ChessBoard currentBoard, int row, int col,
+            Set<ChessPosition> chessPositionsToHighlight, ChessPosition startPos) {
         // Square color
         boolean highlighted = false;
         if (startPos.getRow() == row && startPos.getColumn() == col) {
@@ -580,6 +587,7 @@ public class ChessClient implements NotificationHandler {
         if (piece == null) {
             System.out.print(EscapeSequences.EMPTY);
             System.out.print(EscapeSequences.RESET_BG_COLOR);
+            // this is important
             return;
         }
 
@@ -587,8 +595,10 @@ public class ChessClient implements NotificationHandler {
         String s = pieceColor == ChessGame.TeamColor.WHITE ?
                 EscapeSequences.SET_TEXT_COLOR_BLUE : EscapeSequences.SET_TEXT_COLOR_RED;
         System.out.print(s);
+        // check type and change based on that
 
         switch (piece.getPieceType()) {
+
             case ROOK -> System.out.print(pieceColor == ChessGame.TeamColor.WHITE ?
                     EscapeSequences.WHITE_ROOK : EscapeSequences.BLACK_ROOK);
             case BISHOP -> System.out.print(pieceColor == ChessGame.TeamColor.WHITE ?
@@ -603,6 +613,7 @@ public class ChessClient implements NotificationHandler {
                     EscapeSequences.WHITE_PAWN : EscapeSequences.BLACK_PAWN);
         }
 
+        //reset
         System.out.print(EscapeSequences.RESET_TEXT_COLOR);
         System.out.print(EscapeSequences.RESET_BG_COLOR);
     }
@@ -615,6 +626,7 @@ public class ChessClient implements NotificationHandler {
         // Square color
         if ((row + col) % 2 == 0) {
             System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+            // this is very important
         } else {
             System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
         }
@@ -626,11 +638,13 @@ public class ChessClient implements NotificationHandler {
             return;
         }
 
+        // this will get the team color
         var pieceColor = piece.getTeamColor();
         String s = pieceColor == ChessGame.TeamColor.WHITE ?
                 EscapeSequences.SET_TEXT_COLOR_BLUE : EscapeSequences.SET_TEXT_COLOR_RED;
         System.out.print(s);
 
+        // this will check the type
         switch (piece.getPieceType()) {
             case ROOK -> System.out.print(pieceColor == ChessGame.TeamColor.WHITE ?
                     EscapeSequences.WHITE_ROOK : EscapeSequences.BLACK_ROOK);
