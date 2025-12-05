@@ -2,6 +2,7 @@ package client;
 
 import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessMove;
 import chess.ChessPosition;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
@@ -74,11 +75,14 @@ public class ChessClient implements NotificationHandler {
                     observing = false;
                     playing = false;
                 }
-                else if (inputs[0].equalsIgnoreCase("make move")) {
+                else if (inputs[0].equalsIgnoreCase("move")) {
+                    ChessMove move = getChessMove(inputs[1]);
                     ws.connect(new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID));
                 }
                 else if (inputs[0].equalsIgnoreCase("resign")) {
-                    ws.connect(new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID));
+                    if (confirmResignation()) {
+                        ws.connect(new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID));
+                    }
                 }
             }
 
@@ -271,6 +275,29 @@ public class ChessClient implements NotificationHandler {
         }
     }
 
+    private ChessMove getChessMove(String move) {
+        int fromCol = move.charAt(0) - 'a' + 1;
+        int fromRow = move.charAt(1) - '0';
+
+        int toCol = move.charAt(3) - 'a' + 1;
+        int toRow = move.charAt(4) - '0';
+
+        return new ChessMove(new ChessPosition(fromRow, fromCol), new ChessPosition(toRow, toCol), null);
+    }
+
+    private boolean confirmResignation() {
+        System.out.print("Are you sure you want to resign? (y or n) >>> ");
+
+        Scanner scanner = new Scanner(System.in);
+        var line = scanner.nextLine();
+        String[] inputs = line.split(" ");
+
+        if (inputs[0].equalsIgnoreCase("y")) {
+            return true;
+        }
+        return false;
+    }
+
 
     private void padding(boolean loggedIn, boolean playing, boolean observing, String username, ChessGame.TeamColor playingColor) {
         if (loggedIn && (!playing && !observing)) {
@@ -339,7 +366,7 @@ public class ChessClient implements NotificationHandler {
         System.out.print("""
         redraw               - chess board
         leave                - game
-        make move <starting location> <endlocation> (e2 e4)
+        move <starting location><endlocation> (e2e4) a piece
         resign               - game
         help                 - with possible commands
         """);

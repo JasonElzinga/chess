@@ -11,6 +11,7 @@ import io.javalin.websocket.WsConnectContext;
 import io.javalin.websocket.WsConnectHandler;
 import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
+import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
@@ -90,7 +91,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             if (observer) {
                 throw new DataAccessException("You are an observer you cannot resign");
             }
-            var msg = username + " has left ";
+            var msg = username + " has resigned";
             var notification = new NotificationMessage(msg);
 
             connections.broadcast(session, notification, gameData.gameID());
@@ -172,13 +173,16 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 throw new DataAccessException("Game is null");
             }
             ChessGame.TeamColor playingColor;
-            if (gameData.whiteUsername().equalsIgnoreCase(username)) {
+            if (gameData.whiteUsername() != null && gameData.whiteUsername().equalsIgnoreCase(username)) {
                 playingColor = ChessGame.TeamColor.WHITE;
             } else {
                 playingColor = ChessGame.TeamColor.BLACK;
             }
-            boolean observer = !((gameData.whiteUsername() !) ||
-                    username.equalsIgnoreCase(gameData.blackUsername()));
+            boolean observer =
+                    !((gameData.whiteUsername() != null &&
+                            gameData.whiteUsername().equalsIgnoreCase(username)) ||
+                            (gameData.blackUsername() != null &&
+                                    gameData.blackUsername().equalsIgnoreCase(username)));
             var msg = !observer ? username + " is playing " + playingColor : username + " has joined as an observer";
 
             //System.out.println(msg);
@@ -213,19 +217,23 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 } else {
                     playingColor = ChessGame.TeamColor.BLACK;
                 }
-            } else {
+            } else if (gameData.blackUsername() !=null){
                 if (gameData.blackUsername().equalsIgnoreCase(username)) {
                     playingColor = ChessGame.TeamColor.BLACK;
                 } else {
                     playingColor = ChessGame.TeamColor.WHITE;
                 }
+            } else {
+                playingColor = null;
             }
             var msg = username + " has left ";
             var notification = new NotificationMessage(msg);
 
             connections.broadcast(session, notification, gameData.gameID());
             connections.remove(session, command.getGameID());
-            dataAccess.updateUserGame(game, command.getGameID(), playingColor);
+            if (playingColor != null) {
+                dataAccess.updateUserGame(game, command.getGameID(), playingColor);
+            }
 
         } catch (Exception e) {
             var errorMessage = new ErrorMessage("Error: " + e.getMessage());
