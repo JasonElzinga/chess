@@ -17,7 +17,9 @@ import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import javax.management.NotificationFilter;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
 
 public class ChessClient implements NotificationHandler {
 
@@ -66,7 +68,7 @@ public class ChessClient implements NotificationHandler {
                     helpPlaying();
                 }
                 else if (inputs[0].equalsIgnoreCase("redraw")) {
-                    drawChessBoard(game, playingColor);
+                    drawChessBoard(game, playingColor, null, null);
                 }
                 else if (inputs[0].equalsIgnoreCase("leave")) {
                     ws.connect(new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID));
@@ -101,7 +103,18 @@ public class ChessClient implements NotificationHandler {
                         ws.connect(new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID));
                     }
                 } else if (inputs[0].equalsIgnoreCase("display")) {
-                    displayValidMoves();
+                    if (inputs.length != 2) {
+                        wrongInputs();
+                        continue;
+                    }
+                    ChessPosition pos;
+                    try {
+                        pos = getPosition(inputs[1]);
+                    } catch (Exception e) {
+                        wrongInputs();
+                        continue;
+                    }
+                    displayValidMoves(pos);
                 }
                 else {
                     wrongInputs();
@@ -301,8 +314,22 @@ public class ChessClient implements NotificationHandler {
         }
     }
 
-    private void displayValidMoves(ChessMove move) {
-        //var validMoves = game.validMoves()
+    private ChessPosition getPosition(String pos) {
+        int posCol = pos.charAt(0) - 'a' + 1;
+        int posRow = pos.charAt(1) - '0';
+
+        return new ChessPosition(posRow, posCol);
+    }
+
+    private void displayValidMoves(ChessPosition startPos) {
+        var validMoves = game.validMoves(startPos);
+        Set<ChessPosition> chessPositionsToHighlight = new HashSet<>();
+        for (var m : validMoves) {
+            ChessPosition pos = m.getEndPosition();
+            chessPositionsToHighlight.add(pos);
+        }
+
+        drawChessBoard(game, playingColor, chessPositionsToHighlight, startPos);
     }
 
     private ChessPiece.PieceType getPieceType(String type) {
@@ -449,7 +476,7 @@ public class ChessClient implements NotificationHandler {
 
 
 
-    static private void drawChessBoard(ChessGame board, ChessGame.TeamColor color) {
+    static private void drawChessBoard(ChessGame board, ChessGame.TeamColor color, Set<ChessPosition> chessPositionsToHighlight, ChessPosition startPos) {
 
         var currentBoard = board.getBoard();
         boolean blackPerspective = (color == ChessGame.TeamColor.BLACK);
@@ -466,13 +493,74 @@ public class ChessClient implements NotificationHandler {
         for (int row = rowStart; row != rowEnd + rowStep; row +=rowStep) {
             printNumber(row);
             for (int col = colStart; col != colEnd + colStep; col += colStep) {
-                printSquare(currentBoard, row, col);
+                if (chessPositionsToHighlight == null) {
+                    printSquare(currentBoard, row, col);
+                } else {
+                    printHighlightedSquare(currentBoard, row, col, chessPositionsToHighlight, startPos);
+                }
             }
             printNumber(row);
             System.out.print("\n");
         }
         printLetterRow(color);
     }
+
+
+    private static void printHighlightedSquare(ChessBoard currentBoard, int row, int col, Set<ChessPosition> chessPositionsToHighlight, ChessPosition startPos) {
+        // Square color
+        boolean highlighted = false;
+        if (startPos.getRow() == row && startPos.getColumn() == col) {
+            System.out.print(EscapeSequences.SET_BG_COLOR_YELLOW);
+            highlighted = true;
+        }
+        else {
+            for (var pos : chessPositionsToHighlight) {
+                if (pos.getRow() == row && pos.getColumn() == col) {
+                    System.out.print(EscapeSequences.SET_BG_COLOR_GREEN);
+                    highlighted = true;
+                }
+            }
+        }
+        if (!highlighted &&((row + col) % 2 == 0)) {
+            System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+        } else if (!highlighted &&((row+col) % 2 != 0)) {
+            System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
+        }
+
+        var piece = currentBoard.getPiece(new ChessPosition(row, col));
+        if (piece == null) {
+            System.out.print(EscapeSequences.EMPTY);
+            System.out.print(EscapeSequences.RESET_BG_COLOR);
+            return;
+        }
+
+        var pieceColor = piece.getTeamColor();
+        String s = pieceColor == ChessGame.TeamColor.WHITE ?
+                EscapeSequences.SET_TEXT_COLOR_BLUE : EscapeSequences.SET_TEXT_COLOR_RED;
+        System.out.print(s);
+
+        switch (piece.getPieceType()) {
+            case ROOK -> System.out.print(pieceColor == ChessGame.TeamColor.WHITE ?
+                    EscapeSequences.WHITE_ROOK : EscapeSequences.BLACK_ROOK);
+            case BISHOP -> System.out.print(pieceColor == ChessGame.TeamColor.WHITE ?
+                    EscapeSequences.WHITE_BISHOP : EscapeSequences.BLACK_BISHOP);
+            case KNIGHT -> System.out.print(pieceColor == ChessGame.TeamColor.WHITE ?
+                    EscapeSequences.WHITE_KNIGHT : EscapeSequences.BLACK_KNIGHT);
+            case KING -> System.out.print(pieceColor == ChessGame.TeamColor.WHITE ?
+                    EscapeSequences.WHITE_KING : EscapeSequences.BLACK_KING);
+            case QUEEN -> System.out.print(pieceColor == ChessGame.TeamColor.WHITE ?
+                    EscapeSequences.WHITE_QUEEN : EscapeSequences.BLACK_QUEEN);
+            case PAWN -> System.out.print(pieceColor == ChessGame.TeamColor.WHITE ?
+                    EscapeSequences.WHITE_PAWN : EscapeSequences.BLACK_PAWN);
+        }
+
+        System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+        System.out.print(EscapeSequences.RESET_BG_COLOR);
+    }
+
+
+
+
 
     private static void printSquare(ChessBoard currentBoard, int row, int col) {
         // Square color
@@ -534,7 +622,7 @@ public class ChessClient implements NotificationHandler {
     private void loadGame(LoadGameMessage notification) {
          game = new Gson().fromJson(notification.getMessage(), ChessGame.class);
          System.out.println();
-         drawChessBoard(game, playingColor);
+         drawChessBoard(game, playingColor, null, null);
          padding(loggedIn, playing, observing, username, playingColor);
     }
 }
