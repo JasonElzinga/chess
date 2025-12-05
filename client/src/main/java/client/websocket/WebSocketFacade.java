@@ -65,23 +65,6 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
-//    public void leave(String visitorName) throws ResponseException {
-//        try {
-//            var action = new Action(Action.Type.ENTER, visitorName);
-//            this.session.getBasicRemote().sendText(new Gson().toJson(action));
-//        } catch (IOException ex) {
-//            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
-//        }
-//    }
-//
-//    public void leavePetShop(String visitorName) throws ResponseException {
-//        try {
-//            var action = new Action(Action.Type.EXIT, visitorName);
-//            this.session.getBasicRemote().sendText(new Gson().toJson(action));
-//        } catch (IOException ex) {
-//            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
-//        }
-//    }
 
 }
 
