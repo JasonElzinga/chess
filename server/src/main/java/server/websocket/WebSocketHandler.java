@@ -148,7 +148,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 dataAccess.updateGame(gameData.game(), gameData.gameID());
                 newGame = dataAccess.getGame(gameData.gameID()).game();
                 if (newGame.equals(gameData.game())) {
-                    System.out.println("The move didn't actually work");
+                    //System.out.println("The move didn't actually work");
                 }
             } catch (Exception e) {
                 throw new DataAccessException("Move was invalid");
@@ -157,12 +157,33 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             var gameJson = new Gson().toJson(newGame);
             var makeMoveMessage = new LoadGameMessage(gameJson);
             connections.makeMove(gameData.gameID(), makeMoveMessage);
-            var notification = new NotificationMessage("move: " + move);
+            String strMove = makeBetterMoveString(move);
+            String msg;
+            ChessGame.TeamColor oppositeColor = playingColor == ChessGame.TeamColor.WHITE ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+            if (game.isInCheckmate(ChessGame.TeamColor.WHITE) || game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
+                msg = "move: " + strMove + " That is checkmate!";
+            } else if (game.isInCheck(oppositeColor)) {
+                msg = "move: " + strMove + " Check!";
+            } else {
+                msg = "move: " + strMove;
+            }
+            var notification = new NotificationMessage(msg);
             connections.broadcast(session, notification, gameData.gameID());
         } catch (Exception e) {
             var errorMessage = new ErrorMessage("Error: " + e.getMessage());
             connections.errorMessage(session, errorMessage);
         }
+    }
+
+    private String makeBetterMoveString(ChessMove move) {
+        char startCol = (char)('a' + move.getStartPosition().getColumn() -1);
+        int startRow = move.getStartPosition().getRow();
+
+        char endCol = (char)('a' + move.getEndPosition().getColumn() -1);
+        int endRow = move.getEndPosition().getRow();
+
+        String strMove = "" + startCol + startRow + endCol + endRow;
+        return strMove;
     }
 
     private void connect(UserGameCommand command, Session session) throws IOException {

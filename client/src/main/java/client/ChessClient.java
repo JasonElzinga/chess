@@ -123,11 +123,9 @@ public class ChessClient implements NotificationHandler {
                     continue;
                 }
             }
-            // TODO you need to fix so it will get rid of the player when you leave
+            // TODO you need to fix so it will get rid of the player when you leave //fix
             // TODO when you just exit without leaving what happens
-            // TODO else statement saying bad input
             // TODO notifications for check and checkmate
-            // TODO check for check and checkmate before giving the valid moves
 
 
             else if (loggedIn) {
@@ -344,7 +342,8 @@ public class ChessClient implements NotificationHandler {
     }
 
     private void displayValidMoves(ChessPosition startPos) {
-        if (game.isInCheckmate(ChessGame.TeamColor.WHITE) || game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
+        if (game.isInCheckmate(ChessGame.TeamColor.WHITE) || game.isInCheckmate(ChessGame.TeamColor.BLACK) ||
+                game.getBoardState() == ChessGame.State.FINISHED) {
             drawChessBoard(game, playingColor, null, null);
         }
         var validMoves = game.validMoves(startPos);
