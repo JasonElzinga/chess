@@ -123,9 +123,7 @@ public class ChessClient implements NotificationHandler {
                     continue;
                 }
             }
-            // TODO you need to fix so it will get rid of the player when you leave //fix
             // TODO when you just exit without leaving what happens
-            // TODO notifications for check and checkmate
 
 
             else if (loggedIn) {
