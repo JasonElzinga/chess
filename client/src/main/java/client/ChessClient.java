@@ -29,6 +29,9 @@ public class ChessClient implements NotificationHandler {
     private boolean loggedIn;
     private boolean observing;
     private ChessGame.TeamColor playingColor;
+    private ChessGame game;
+    private int gameID;
+    private String authToken;
 
     public ChessClient(String serverUrl) throws ResponseException {
         facade = new ServerFacade(serverUrl);
@@ -39,11 +42,9 @@ public class ChessClient implements NotificationHandler {
     public void run(String[] args) throws ResponseException {
         //var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
 
-        ChessGame board = new ChessGame();
 
         System.out.print("♕ 240 Chess Client: type help to get started.\n");
         Scanner scanner = new Scanner(System.in);
-        String authToken = "";
         int[][] currentGames = new int[1][1];
         currentGames[0][0] = 0;
 
@@ -52,7 +53,7 @@ public class ChessClient implements NotificationHandler {
         this.playing = false;
         this.observing = false;
         this.playingColor = ChessGame.TeamColor.WHITE;
-
+        this.authToken = "";
 
         while (true) {
             padding(loggedIn, playing, observing, username, playingColor);
@@ -64,6 +65,20 @@ public class ChessClient implements NotificationHandler {
             if (playing || observing) {
                 if (inputs[0].equalsIgnoreCase("help")) {
                     helpPlaying();
+                }
+                else if (inputs[0].equalsIgnoreCase("redraw")) {
+                    drawChessBoard(game, playingColor);
+                }
+                else if (inputs[0].equalsIgnoreCase("leave")) {
+                    ws.connect(new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID));
+                    observing = false;
+                    playing = false;
+                }
+                else if (inputs[0].equalsIgnoreCase("make move")) {
+                    ws.connect(new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID));
+                }
+                else if (inputs[0].equalsIgnoreCase("resign")) {
+                    ws.connect(new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID));
                 }
             }
 
@@ -141,10 +156,10 @@ public class ChessClient implements NotificationHandler {
                         facade.joinGame(new JoinGameRequest(colorStr, intendedGameID), authToken);
                         playing = true;
                         playingColor = color;
-                        board = new ChessGame();
-                        drawChessBoard(board,color);
+                        //game = new ChessGame();
 
                         ws.connect(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, intendedGameID));
+                        gameID = intendedGameID;
                     } catch (Exception e) {
                         error("joining game failed");
                     }
@@ -178,14 +193,21 @@ public class ChessClient implements NotificationHandler {
                         System.out.println("joining game failed, you didn't provide a number to join the game");
                         continue;
                     }
-                    if (intendedGameID > inputs.length +1 || intendedGameID <= 0) {
+                    try {
+                        intendedGameID = currentGames[intendedGameID - 1][0];
+                    } catch (Exception e) {
+                        wrongInputs();
+                    }
+                    if (intendedGameID <= 0) {
                         wrongInputs();
                         continue;
                     } // -4 for joining, make sure to print error to join game 27, and then observe
                     try {
-                        board = new ChessGame();
-                        drawChessBoard(board, ChessGame.TeamColor.WHITE);
-
+                        //board = new ChessGame();
+                        //drawChessBoard(board, ChessGame.TeamColor.WHITE);
+                        ws.connect(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, intendedGameID));
+                        observing = true;
+                        gameID = intendedGameID;
                     } catch (Exception e) {
                         error("Failed observing the game");
                     }
@@ -249,13 +271,14 @@ public class ChessClient implements NotificationHandler {
         }
     }
 
+
     private void padding(boolean loggedIn, boolean playing, boolean observing, String username, ChessGame.TeamColor playingColor) {
-        if (loggedIn && !playing) {
+        if (loggedIn && (!playing && !observing)) {
             System.out.print("[LOGGED_IN] >>> ");
         } else if (playing) {
             System.out.print("[PLAYING as " + username + " as " + playingColor + "] >>> ");
         } else if (observing) {
-            System.out.print("[Observing]");
+            System.out.print("[Observing] >>> ");
         }
         else {
             System.out.print("[LOGGED_OUT] >>> ");
@@ -422,15 +445,22 @@ public class ChessClient implements NotificationHandler {
         switch (notification.getServerMessageType()) {
             case NOTIFICATION -> {
                 System.out.println(notification.getMessage());
+                padding(loggedIn, playing, observing, username, playingColor);
+
             }
-            case ERROR -> System.out.println(notification.getMessage());
+            case ERROR -> {
+                System.out.println(notification.getMessage());
+                padding(loggedIn, playing, observing, username, playingColor);
+            }
             case LOAD_GAME -> loadGame((LoadGameMessage) notification);
         }
-        padding(loggedIn, playing, observing, username, playingColor);
 
     }
 
     private void loadGame(LoadGameMessage notification) {
-        ChessGame game = new Gson().fromJson(notification.getMessage(), ChessGame.class);
+         game = new Gson().fromJson(notification.getMessage(), ChessGame.class);
+         System.out.println();
+         drawChessBoard(game, playingColor);
+         padding(loggedIn, playing, observing, username, playingColor);
     }
 }

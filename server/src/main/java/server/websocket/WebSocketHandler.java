@@ -167,24 +167,27 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void connect(UserGameCommand command, Session session) throws IOException {
         try {
             var username = dataAccess.getAuthData(command.getAuthToken()).username();
-            var game = dataAccess.getGame(command.getGameID());
-            if (game == null) {
+            var gameData = dataAccess.getGame(command.getGameID());
+            if (gameData == null) {
                 throw new DataAccessException("Game is null");
             }
             ChessGame.TeamColor playingColor;
-            if (game.whiteUsername().equalsIgnoreCase(username)) {
+            if (gameData.whiteUsername().equalsIgnoreCase(username)) {
                 playingColor = ChessGame.TeamColor.WHITE;
             } else {
                 playingColor = ChessGame.TeamColor.BLACK;
             }
-            var msg = username + " is playing " + playingColor;
+            boolean observer = !((gameData.whiteUsername() !) ||
+                    username.equalsIgnoreCase(gameData.blackUsername()));
+            var msg = !observer ? username + " is playing " + playingColor : username + " has joined as an observer";
+
             //System.out.println(msg);
             var notification = new NotificationMessage(msg);
 
             connections.broadcast(session, notification, command.getGameID());
 
             var serializer = new Gson();
-            var gameJson = serializer.toJson(game.game());
+            var gameJson = serializer.toJson(gameData.game());
             var loadGameNotification = new LoadGameMessage(gameJson);
             connections.loadGame(session, loadGameNotification);
             connections.add(session, command.getGameID());
