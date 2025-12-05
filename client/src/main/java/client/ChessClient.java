@@ -344,17 +344,21 @@ public class ChessClient implements NotificationHandler {
 
     private void displayValidMoves(ChessPosition startPos) {
         if (game.isInCheckmate(ChessGame.TeamColor.WHITE) || game.isInCheckmate(ChessGame.TeamColor.BLACK) ||
+                game.isInStalemate(ChessGame.TeamColor.WHITE) || game.isInStalemate(ChessGame.TeamColor.BLACK) ||
                 game.getBoardState() == ChessGame.State.FINISHED) {
-            drawChessBoard(game, playingColor, null, null);
+            System.out.println("The game is already finished, no other valid moves available");
+            //drawChessBoard(game, playingColor, null, startPos);
         }
-        var validMoves = game.validMoves(startPos);
-        Set<ChessPosition> chessPositionsToHighlight = new HashSet<>();
-        for (var m : validMoves) {
-            ChessPosition pos = m.getEndPosition();
-            chessPositionsToHighlight.add(pos);
-        }
+        else {
+            var validMoves = game.validMoves(startPos);
+            Set<ChessPosition> chessPositionsToHighlight = new HashSet<>();
+            for (var m : validMoves) {
+                ChessPosition pos = m.getEndPosition();
+                chessPositionsToHighlight.add(pos);
+            }
 
-        drawChessBoard(game, playingColor, chessPositionsToHighlight, startPos);
+            drawChessBoard(game, playingColor, chessPositionsToHighlight, startPos);
+        }
     }
 
     private ChessPiece.PieceType getPieceType(String type) {
@@ -430,7 +434,7 @@ public class ChessClient implements NotificationHandler {
         } else if (playing) {
             System.out.print("[PLAYING as " + username + " as " + playingColor + "] >>> ");
         } else if (observing) {
-            System.out.print("[Observing] >>> ");
+            System.out.print("[Observing as " + username +"] >>> ");
         }
         else {
             System.out.print("[LOGGED_OUT] >>> ");

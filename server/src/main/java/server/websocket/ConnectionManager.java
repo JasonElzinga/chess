@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 //import webSocketMessages.Notification;
 
@@ -72,5 +73,11 @@ public class ConnectionManager {
                 }
             }
         }
+    }
+
+    public void specialState(Session session, NotificationMessage notification) throws IOException {
+
+        var serializer = new Gson();
+        session.getRemote().sendString(serializer.toJson(notification));
     }
 }

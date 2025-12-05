@@ -160,15 +160,23 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String strMove = makeBetterMoveString(move);
             String msg;
             ChessGame.TeamColor oppositeColor = playingColor == ChessGame.TeamColor.WHITE ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+            String otherPlayer = oppositeColor == ChessGame.TeamColor.WHITE ? gameData.whiteUsername() : gameData.blackUsername();
             if (game.isInCheckmate(ChessGame.TeamColor.WHITE) || game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
-                msg = "move: " + strMove + " That is checkmate!";
-            } else if (game.isInCheck(oppositeColor)) {
-                msg = "move: " + strMove + " Check!";
+                msg = username + " moved: " + strMove +  " Player " + otherPlayer + " is in checkmate";
+                game.setBoardState();
+            } else if (game.isInStalemate(ChessGame.TeamColor.WHITE) || game.isInStalemate(ChessGame.TeamColor.BLACK)) {
+                msg = username + " moved: " + strMove + " Stalemate!";
+                game.setBoardState();
+            }
+            else if (game.isInCheck(oppositeColor)) {
+                msg = username + " moved: " + strMove + " Player " + otherPlayer + " is in Check!";
             } else {
-                msg = "move: " + strMove;
+                msg = username + " moved: " + strMove;
             }
             var notification = new NotificationMessage(msg);
             connections.broadcast(session, notification, gameData.gameID());
+            connections.specialState(session, notification);
+
         } catch (Exception e) {
             var errorMessage = new ErrorMessage("Error: " + e.getMessage());
             connections.errorMessage(session, errorMessage);
