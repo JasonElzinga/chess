@@ -104,6 +104,11 @@ public class ChessClient implements NotificationHandler {
                         wrongInputs();
                         continue;
                     }
+                    String inputtedPos = inputs[1];
+                    if (inputtedPos.length() != 2) {
+                        wrongInputs();
+                        continue;
+                    }
                     ChessPosition pos;
                     try {
                         pos = getPosition(inputs[1]);
@@ -311,14 +316,37 @@ public class ChessClient implements NotificationHandler {
         }
     }
 
-    private ChessPosition getPosition(String pos) {
+    private ChessPosition getPosition(String pos) throws Exception {
+        String[] letters = {
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "g",
+                "h"
+        };
+        String test1 = pos.substring(0,0);
+        for (var l : letters) {
+            if (test1.equalsIgnoreCase(l)) {
+                throw new Exception("This is not a letter");
+            }
+        }
+
         int posCol = pos.charAt(0) - 'a' + 1;
         int posRow = pos.charAt(1) - '0';
 
+        if ((posCol < 1 || posCol > 8) && (posRow < 1 || posRow > 8)) {
+            throw new Exception("Bad input");
+        }
         return new ChessPosition(posRow, posCol);
     }
 
     private void displayValidMoves(ChessPosition startPos) {
+        if (game.isInCheckmate(ChessGame.TeamColor.WHITE) || game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
+            drawChessBoard(game, playingColor, null, null);
+        }
         var validMoves = game.validMoves(startPos);
         Set<ChessPosition> chessPositionsToHighlight = new HashSet<>();
         for (var m : validMoves) {
@@ -345,7 +373,34 @@ public class ChessClient implements NotificationHandler {
         return null;
     }
 
-    private ChessMove getChessMove(String move,  ChessPiece.PieceType promotionType) {
+    private ChessMove getChessMove(String move,  ChessPiece.PieceType promotionType) throws Exception {
+
+        String[] letters = {
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "g",
+                "h"
+        };
+
+        String test1 = move.substring(0,0);
+        for (var l : letters) {
+            if (test1.equalsIgnoreCase(l)) {
+                throw new Exception("This is not a letter");
+            }
+        }
+
+        String test2 = move.substring(2,2);
+        for (var l : letters) {
+            if (test2.equalsIgnoreCase(l)) {
+                throw new Exception("This is not a letter");
+            }
+        }
+
+
         int fromCol = move.charAt(0) - 'a' + 1;
         int fromRow = move.charAt(1) - '0';
 
