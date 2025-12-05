@@ -100,10 +100,18 @@ public class ChessClient implements NotificationHandler {
                     if (confirmResignation()) {
                         ws.connect(new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID));
                     }
+                } else if (inputs[0].equalsIgnoreCase("display")) {
+                    displayValidMoves();
+                }
+                else {
+                    wrongInputs();
+                    continue;
                 }
             }
             // TODO you need to fix so it will get rid of the player when you leave
             // TODO when you just exit without leaving what happens
+            // TODO else statement saying bad input
+
 
             else if (loggedIn) {
                 if (inputs[0].equalsIgnoreCase("help")) {
@@ -293,6 +301,10 @@ public class ChessClient implements NotificationHandler {
         }
     }
 
+    private void displayValidMoves(ChessMove move) {
+        //var validMoves = game.validMoves()
+    }
+
     private ChessPiece.PieceType getPieceType(String type) {
         if (type.equalsIgnoreCase("Rook")) {
             return ChessPiece.PieceType.ROOK;
@@ -403,6 +415,7 @@ public class ChessClient implements NotificationHandler {
         move <starting location><endlocation> (e2e4) <promation piece> (if pawn will be promoted>)
         resign               - game
         help                 - with possible commands
+        display <position> (e2) - to get the legal moves of that piece as shown by highlighted squares
         """);
     }
 
