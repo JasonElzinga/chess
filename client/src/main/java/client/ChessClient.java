@@ -13,10 +13,8 @@ import ui.EscapeSequences;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.LoadGameMessage;
-import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
-import javax.management.NotificationFilter;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
@@ -42,7 +40,6 @@ public class ChessClient implements NotificationHandler {
 
     public void run(String[] args) throws ResponseException {
         //var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
-
 
         System.out.print("♕ 240 Chess Client: type help to get started.\n");
         Scanner scanner = new Scanner(System.in);
@@ -124,6 +121,8 @@ public class ChessClient implements NotificationHandler {
             // TODO you need to fix so it will get rid of the player when you leave
             // TODO when you just exit without leaving what happens
             // TODO else statement saying bad input
+            // TODO notifications for check and checkmate
+            // TODO check for check and checkmate before giving the valid moves
 
 
             else if (loggedIn) {
@@ -188,7 +187,7 @@ public class ChessClient implements NotificationHandler {
                     else {
                         System.out.println("joining game failed, you didn't provide the right color to join the game");
                         continue;
-                    };
+                    }
                     try {
                         intendedGameID = currentGames[intendedGameID - 1][0];
                     } catch (Exception e) {
@@ -244,10 +243,8 @@ public class ChessClient implements NotificationHandler {
                     if (intendedGameID <= 0) {
                         wrongInputs();
                         continue;
-                    } // -4 for joining, make sure to print error to join game 27, and then observe
+                    }
                     try {
-                        //board = new ChessGame();
-                        //drawChessBoard(board, ChessGame.TeamColor.WHITE);
                         ws.connect(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, intendedGameID));
                         observing = true;
                         gameID = intendedGameID;
@@ -439,7 +436,7 @@ public class ChessClient implements NotificationHandler {
         System.out.print("""
         redraw               - chess board
         leave                - game
-        move <starting location><endlocation> (e2e4) <promation piece> (if pawn will be promoted>)
+        move <starting location><end location> (e2e4) <promotion piece> (if pawn will be promoted>)
         resign               - game
         help                 - with possible commands
         display <position> (e2) - to get the legal moves of that piece as shown by highlighted squares
