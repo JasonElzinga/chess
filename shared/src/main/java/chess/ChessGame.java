@@ -13,10 +13,12 @@ import java.util.Objects;
 public class ChessGame {
     private ChessBoard board;
     private TeamColor team;
+    private State state;
 
     public ChessGame() {
         this.team = TeamColor.WHITE;
         this.board = new ChessBoard();
+        this.state = State.PLAYING;
         board.resetBoard();
     }
 
@@ -36,12 +38,23 @@ public class ChessGame {
         this.team = team;
     }
 
+    public void setBoardState() {
+        switch (state) {
+            case PLAYING -> state = State.FINISHED;
+        }
+    }
+
     /**
      * Enum identifying the 2 possible teams in a chess game
      */
     public enum TeamColor {
         WHITE,
         BLACK
+    }
+
+    public enum State {
+        PLAYING,
+        FINISHED
     }
 
     /**
@@ -239,6 +252,11 @@ public class ChessGame {
     public ChessBoard getBoard() {
         return board;
     }
+
+    public State getBoardState() {
+        return state;
+    }
+
 
     @Override
     public String toString() {

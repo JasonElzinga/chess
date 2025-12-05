@@ -51,13 +51,6 @@ public class ConnectionManager {
         var serializer = new Gson();
 
         session.getRemote().sendString(serializer.toJson(notification));
-//        var serializer = new Gson();
-//
-//        for (Session c : connections.values()) {
-//            if (c.equals(excludeSession)) {
-//                c.getRemote().sendString(serializer.toJson(notification));
-//            }
-//        }
     }
 
     public void errorMessage(Session session, ServerMessage notification) throws IOException {
@@ -66,13 +59,6 @@ public class ConnectionManager {
 
         session.getRemote().sendString(serializer.toJson(notification));
 
-//        for (Session c : connections.values()) {
-//            if (c.isOpen()) {
-//                if (c.equals(session)) {
-//                    c.getRemote().sendString(serializer.toJson(notification));
-//                }
-//            }
-//        }
     }
 
     public void makeMove(int gameID, LoadGameMessage notification) throws IOException {

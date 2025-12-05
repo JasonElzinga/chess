@@ -54,7 +54,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void resign(UserGameCommand command, Session session) {
+    private void resign(UserGameCommand command, Session session) throws IOException {
         try {
             var username = dataAccess.getAuthData(command.getAuthToken()).username();
             var gameData = dataAccess.getGame(command.getGameID());
@@ -62,26 +62,42 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 throw new DataAccessException("Game is null");
             }
             var game = gameData.game();
+            var state = game.getBoardState();
+
+            if (state == ChessGame.State.FINISHED) {
+                throw new DataAccessException("Game is already finished");
+            }
+
             ChessGame.TeamColor playingColor;
+            String whiteUsername;
+            String blackUsername;
+            boolean observer = !(username.equalsIgnoreCase(gameData.whiteUsername()) ||
+                    username.equalsIgnoreCase(gameData.blackUsername()));
+
             if (gameData.whiteUsername() != null) {
                 if (gameData.whiteUsername().equalsIgnoreCase(username)) {
                     playingColor = ChessGame.TeamColor.WHITE;
                 } else {
                     playingColor = ChessGame.TeamColor.BLACK;
                 }
-            } else {
+            } else if (gameData.blackUsername() != null) {
                 if (gameData.blackUsername().equalsIgnoreCase(username)) {
                     playingColor = ChessGame.TeamColor.BLACK;
                 } else {
                     playingColor = ChessGame.TeamColor.WHITE;
                 }
             }
+            if (observer) {
+                throw new DataAccessException("You are an observer you cannot resign");
+            }
             var msg = username + " has left ";
             var notification = new NotificationMessage(msg);
 
             connections.broadcast(session, notification, gameData.gameID());
+            connections.loadGame(session, notification);
             //connections.remove(session, command.getGameID());
-            dataAccess.updateGameState(game);
+            game.setBoardState();
+            dataAccess.updateGame(game, gameData.gameID());
 
         } catch (Exception e) {
             var errorMessage = new ErrorMessage("Error: " + e.getMessage());
@@ -103,6 +119,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 throw new DataAccessException("Game is null");
             }
             var game = gameData.game();
+            var state = game.getBoardState();
+
+            if (state == ChessGame.State.FINISHED) {
+                throw new DataAccessException("Game is already finished");
+            }
 
             var teamTurn = game.getTeamTurn();
             ChessGame.TeamColor playingColor;
